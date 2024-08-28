@@ -3,6 +3,7 @@ using LiveSplit.Model.Comparisons;
 using LiveSplit.TimeFormatters;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -301,6 +302,11 @@ namespace LiveSplit.UI.Components
             = btnCurrentNamesColor.Enabled = btnAfterNamesColor.Enabled = chkOverrideTextColor.Checked;
         }
 
+        void rdoDeltaHundredths_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateDeltaAccuracy();
+        }
+
         void rdoDeltaTenths_CheckedChanged(object sender, EventArgs e)
         {
             UpdateDeltaAccuracy();
@@ -337,6 +343,11 @@ namespace LiveSplit.UI.Components
         {
             LockLastSplit = chkLockLastSplit.Checked;
             SplitLayoutChanged(this, null);
+        }
+
+        void rdoHundredths_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateAccuracy();
         }
 
         void rdoTenths_CheckedChanged(object sender, EventArgs e)
@@ -392,8 +403,10 @@ namespace LiveSplit.UI.Components
                 SplitTimesAccuracy = TimeAccuracy.Seconds;
             else if (rdoTenths.Checked)
                 SplitTimesAccuracy = TimeAccuracy.Tenths;
-            else
+            else if (rdoHundredths.Checked)
                 SplitTimesAccuracy = TimeAccuracy.Hundredths;
+            else
+                SplitTimesAccuracy = TimeAccuracy.Milliseconds;
         }
 
         void UpdateDeltaAccuracy()
@@ -402,8 +415,10 @@ namespace LiveSplit.UI.Components
                 DeltasAccuracy = TimeAccuracy.Seconds;
             else if (rdoDeltaTenths.Checked)
                 DeltasAccuracy = TimeAccuracy.Tenths;
-            else
+            else if (rdoDeltaHundredths.Checked)
                 DeltasAccuracy = TimeAccuracy.Hundredths;
+            else
+                DeltasAccuracy = TimeAccuracy.Milliseconds;
         }
 
         void chkLastSplit_CheckedChanged(object sender, EventArgs e)
@@ -446,18 +461,22 @@ namespace LiveSplit.UI.Components
             rdoSeconds.Checked = SplitTimesAccuracy == TimeAccuracy.Seconds;
             rdoTenths.Checked = SplitTimesAccuracy == TimeAccuracy.Tenths;
             rdoHundredths.Checked = SplitTimesAccuracy == TimeAccuracy.Hundredths;
+            rdoMilliseconds.Checked = SplitTimesAccuracy == TimeAccuracy.Milliseconds;
 
             rdoDeltaSeconds.Checked = DeltasAccuracy == TimeAccuracy.Seconds;
             rdoDeltaTenths.Checked = DeltasAccuracy == TimeAccuracy.Tenths;
             rdoDeltaHundredths.Checked = DeltasAccuracy == TimeAccuracy.Hundredths;
+            rdoDeltaMilliseconds.Checked = DeltasAccuracy == TimeAccuracy.Milliseconds;
 
             rdoHeaderAccuracySeconds.Checked = HeaderAccuracy == TimeAccuracy.Seconds;
             rdoHeaderAccuracyTenths.Checked = HeaderAccuracy == TimeAccuracy.Tenths;
-            rdoHeaderAccuracyHundreths.Checked = HeaderAccuracy == TimeAccuracy.Hundredths;
+            rdoHeaderAccuracyHundredths.Checked = HeaderAccuracy == TimeAccuracy.Hundredths;
+            rdoHeaderAccuracyMilliseconds.Checked = HeaderAccuracy == TimeAccuracy.Milliseconds;
 
             rdoSectionTimerAccuracySeconds.Checked = SectionTimerAccuracy == TimeAccuracy.Seconds;
             rdoSectionTimerAccuracyTenths.Checked = SectionTimerAccuracy == TimeAccuracy.Tenths;
-            rdoSectionTimerAccuracyHundreths.Checked = SectionTimerAccuracy == TimeAccuracy.Hundredths;
+            rdoSectionTimerAccuracyHundredths.Checked = SectionTimerAccuracy == TimeAccuracy.Hundredths;
+            rdoSectionTimerAccuracyMilliseconds.Checked = SectionTimerAccuracy == TimeAccuracy.Milliseconds;
 
             if (Mode == LayoutMode.Horizontal)
             {
@@ -708,7 +727,7 @@ namespace LiveSplit.UI.Components
             SettingsHelper.ColorButtonClick((Button)sender, this);
         }
 
-        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        private void rdoHideSubsplits_CheckedChanged(object sender, EventArgs e)
         {
             UpdateSubsplitVisibility();
         }
@@ -762,8 +781,10 @@ namespace LiveSplit.UI.Components
                 HeaderAccuracy = TimeAccuracy.Seconds;
             else if (rdoHeaderAccuracyTenths.Checked)
                 HeaderAccuracy = TimeAccuracy.Tenths;
-            else
+            else if (rdoHeaderAccuracyHundredths.Checked)
                 HeaderAccuracy = TimeAccuracy.Hundredths;
+            else
+                HeaderAccuracy = TimeAccuracy.Milliseconds;
         }
 
         private void rdoHeaderAccuracySeconds_CheckedChanged(object sender, EventArgs e)
@@ -776,7 +797,7 @@ namespace LiveSplit.UI.Components
             UpdateHeaderAccuracy();
         }
 
-        private void rdoHeaderAccuracyHundreths_CheckedChanged(object sender, EventArgs e)
+        private void rdoHeaderAccuracyHundredths_CheckedChanged(object sender, EventArgs e)
         {
             UpdateHeaderAccuracy();
         }
@@ -789,13 +810,13 @@ namespace LiveSplit.UI.Components
         void UpdateSectionTimerAccuracy()
         {
             if (rdoSectionTimerAccuracySeconds.Checked)
-            {
                 SectionTimerAccuracy = TimeAccuracy.Seconds;
-            }
             else if (rdoSectionTimerAccuracyTenths.Checked)
                 SectionTimerAccuracy = TimeAccuracy.Tenths;
-            else
+            else if (rdoSectionTimerAccuracyHundredths.Checked)
                 SectionTimerAccuracy = TimeAccuracy.Hundredths;
+            else
+                SectionTimerAccuracy = TimeAccuracy.Milliseconds;
         }
 
         private void rdoSectionTimerAccuracySeconds_CheckedChanged(object sender, EventArgs e)
@@ -808,7 +829,7 @@ namespace LiveSplit.UI.Components
             UpdateSectionTimerAccuracy();
         }
 
-        private void rdoSectionTimerAccuracyHundreths_CheckedChanged(object sender, EventArgs e)
+        private void rdoSectionTimerAccuracyHundredths_CheckedChanged(object sender, EventArgs e)
         {
             UpdateSectionTimerAccuracy();
         }
