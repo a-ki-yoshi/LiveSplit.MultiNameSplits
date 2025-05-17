@@ -27,8 +27,6 @@ public class SplitComponent : IComponent
 
     protected SimpleLabel NameLabel { get; set; }
     protected SimpleLabel TimeLabel { get; set; }
-    protected SimpleLabel MeasureTimeLabel { get; set; }
-    protected SimpleLabel MeasureDeltaLabel { get; set; }
     protected SimpleLabel HeaderMeasureTimeLabel { get; set; }
     protected SimpleLabel HeaderMeasureDeltaLabel { get; set; }
     protected SimpleLabel DeltaLabel { get; set; }
@@ -67,6 +65,7 @@ public class SplitComponent : IComponent
 
     public IEnumerable<ColumnData> ColumnsList { get; set; }
     public IList<SimpleLabel> LabelsList { get; set; }
+    protected List<float> ColumnWidths { get; }
 
     private readonly Regex SubsplitRegex = new(@"^{(.+)}\s*(.+)$", RegexOptions.Compiled);
 
@@ -81,7 +80,7 @@ public class SplitComponent : IComponent
 
     public IDictionary<string, Action> ContextMenuControls => null;
 
-    public SplitComponent(SplitsSettings settings, IEnumerable<ColumnData> columnsList)
+    public SplitComponent(SplitsSettings settings, IEnumerable<ColumnData> columnsList, List<float> columnWidths)
     {
         NameLabel = new SimpleLabel()
         {
@@ -96,7 +95,6 @@ public class SplitComponent : IComponent
             Y = 3,
             Text = ""
         };
-        MeasureTimeLabel = new SimpleLabel();
         HeaderMeasureTimeLabel = new SimpleLabel();
         DeltaLabel = new SimpleLabel()
         {
@@ -104,10 +102,10 @@ public class SplitComponent : IComponent
             Y = 3,
             Text = ""
         };
-        MeasureDeltaLabel = new SimpleLabel();
         HeaderMeasureDeltaLabel = new SimpleLabel();
         Settings = settings;
         ColumnsList = columnsList;
+        ColumnWidths = columnWidths;
         TimeFormatter = new SplitTimeFormatter(Settings.SplitTimesAccuracy);
         DeltaTimeFormatter = new DeltaSplitTimeFormatter(Settings.DeltasAccuracy, Settings.DropDecimals);
         HeaderTimesFormatter = new SplitTimeFormatter(Settings.HeaderAccuracy);
@@ -124,22 +122,14 @@ public class SplitComponent : IComponent
 
     private void SetMeasureLabels(Graphics g, LiveSplitState state)
     {
-        MeasureTimeLabel.Text = TimeFormatter.Format(new TimeSpan(24, 0, 0));
-        MeasureDeltaLabel.Text = DeltaTimeFormatter.Format(new TimeSpan(0, 9, 0, 0));
         HeaderMeasureTimeLabel.Text = HeaderTimesFormatter.Format(new TimeSpan(24, 0, 0));
         HeaderMeasureDeltaLabel.Text = SectionTimerFormatter.Format(new TimeSpan(0, 9, 0, 0));
 
-        MeasureTimeLabel.Font = state.LayoutSettings.TimesFont;
-        MeasureTimeLabel.IsMonospaced = true;
-        MeasureDeltaLabel.Font = state.LayoutSettings.TimesFont;
-        MeasureDeltaLabel.IsMonospaced = true;
         HeaderMeasureTimeLabel.Font = state.LayoutSettings.TimesFont;
         HeaderMeasureTimeLabel.IsMonospaced = true;
         HeaderMeasureDeltaLabel.Font = state.LayoutSettings.TimesFont;
         HeaderMeasureDeltaLabel.IsMonospaced = true;
 
-        MeasureTimeLabel.SetActualWidth(g);
-        MeasureDeltaLabel.SetActualWidth(g);
         HeaderMeasureTimeLabel.SetActualWidth(g);
         HeaderMeasureDeltaLabel.SetActualWidth(g);
     }
@@ -314,25 +304,16 @@ public class SplitComponent : IComponent
 
             if (ColumnsList.Count() == LabelsList.Count)
             {
+                while (ColumnWidths.Count < LabelsList.Count)
+                {
+                    ColumnWidths.Add(0f);
+                }
+
                 float curX = width - 7;
                 float nameX = width - 7;
                 foreach (SimpleLabel label in LabelsList.Reverse())
                 {
-                    ColumnData column = ColumnsList.ElementAt(LabelsList.IndexOf(label));
-
-                    float labelWidth = 0f;
-                    if (column.Type is ColumnType.DeltaorSplitTime or ColumnType.SegmentDeltaorSegmentTime)
-                    {
-                        labelWidth = Math.Max(MeasureDeltaLabel.ActualWidth, MeasureTimeLabel.ActualWidth);
-                    }
-                    else if (column.Type is ColumnType.Delta or ColumnType.SegmentDelta)
-                    {
-                        labelWidth = MeasureDeltaLabel.ActualWidth;
-                    }
-                    else
-                    {
-                        labelWidth = MeasureTimeLabel.ActualWidth;
-                    }
+                    float labelWidth = ColumnWidths[LabelsList.IndexOf(label)];
 
                     label.Width = labelWidth + 20;
                     curX -= labelWidth + 5;
@@ -864,7 +845,7 @@ public class SplitComponent : IComponent
         int splitIndex = state.Run.IndexOf(Split);
         if (splitIndex < state.CurrentSplitIndex)
         {
-            if (type is ColumnType.SplitTime or ColumnType.SegmentTime)
+            if (type is ColumnType.SplitTime or ColumnType.SegmentTime or ColumnType.CustomVariable)
             {
                 label.ForeColor = Settings.OverrideTimesColor ? Settings.BeforeTimesColor : state.LayoutSettings.TextColor;
 
@@ -872,10 +853,15 @@ public class SplitComponent : IComponent
                 {
                     label.Text = TimeFormatter.Format(Split.SplitTime[timingMethod]);
                 }
-                else //SegmentTime
+                else if (type == ColumnType.SegmentTime)
                 {
                     TimeSpan? segmentTime = LiveSplitStateHelper.GetPreviousSegmentTime(state, splitIndex, timingMethod);
                     label.Text = TimeFormatter.Format(segmentTime);
+                }
+                else if (type == ColumnType.CustomVariable)
+                {
+                    Split.CustomVariableValues.TryGetValue(data.Name, out string text);
+                    label.Text = text ?? "";
                 }
             }
 
@@ -938,7 +924,7 @@ public class SplitComponent : IComponent
         }
         else
         {
-            if (type is ColumnType.SplitTime or ColumnType.SegmentTime or ColumnType.DeltaorSplitTime or ColumnType.SegmentDeltaorSegmentTime)
+            if (type is ColumnType.SplitTime or ColumnType.SegmentTime or ColumnType.DeltaorSplitTime or ColumnType.SegmentDeltaorSegmentTime or ColumnType.CustomVariable)
             {
                 if (IsActive)
                 {
@@ -953,7 +939,7 @@ public class SplitComponent : IComponent
                 {
                     label.Text = TimeFormatter.Format(Split.Comparisons[comparison][timingMethod]);
                 }
-                else //SegmentTime or SegmentTimeorSegmentDeltaTime
+                else if (type is ColumnType.SegmentTime or ColumnType.SegmentDeltaorSegmentTime)
                 {
                     TimeSpan previousTime = TimeSpan.Zero;
                     for (int index = splitIndex - 1; index >= 0; index--)
@@ -967,6 +953,17 @@ public class SplitComponent : IComponent
                     }
 
                     label.Text = TimeFormatter.Format(Split.Comparisons[comparison][timingMethod] - previousTime);
+                }
+                else if (type is ColumnType.CustomVariable)
+                {
+                    if (splitIndex == state.CurrentSplitIndex)
+                    {
+                        label.Text = state.Run.Metadata.CustomVariableValue(data.Name) ?? "";
+                    }
+                    else if (splitIndex > state.CurrentSplitIndex)
+                    {
+                        label.Text = "";
+                    }
                 }
             }
 
@@ -1031,7 +1028,7 @@ public class SplitComponent : IComponent
         int splitIndex = state.Run.IndexOf(Split);
         if (splitIndex < state.CurrentSplitIndex)
         {
-            if (type is ColumnType.SplitTime or ColumnType.SegmentTime)
+            if (type is ColumnType.SplitTime or ColumnType.SegmentTime or ColumnType.CustomVariable)
             {
                 label.ForeColor = Settings.OverrideTimesColor ? Settings.BeforeTimesColor : state.LayoutSettings.TextColor;
 
@@ -1039,10 +1036,15 @@ public class SplitComponent : IComponent
                 {
                     label.Text = TimeFormatter.Format(Split.SplitTime[timingMethod]);
                 }
-                else //SegmentTime
+                else if (type == ColumnType.SegmentTime)
                 {
                     TimeSpan? segmentTime = getSectionTime(state, splitIndex, TopSplit, comparison, timingMethod);
                     label.Text = TimeFormatter.Format(segmentTime);
+                }
+                else if (type == ColumnType.CustomVariable)
+                {
+                    Split.CustomVariableValues.TryGetValue(data.Name, out string text);
+                    label.Text = text ?? "";
                 }
             }
 
@@ -1107,7 +1109,7 @@ public class SplitComponent : IComponent
         }
         else
         {
-            if (type is ColumnType.SplitTime or ColumnType.SegmentTime or ColumnType.DeltaorSplitTime or ColumnType.SegmentDeltaorSegmentTime)
+            if (type is ColumnType.SplitTime or ColumnType.SegmentTime or ColumnType.DeltaorSplitTime or ColumnType.SegmentDeltaorSegmentTime or ColumnType.CustomVariable)
             {
                 if (IsActive)
                 {
@@ -1122,10 +1124,21 @@ public class SplitComponent : IComponent
                 {
                     label.Text = TimeFormatter.Format(Split.Comparisons[comparison][timingMethod]);
                 }
-                else //SegmentTime or SegmentTimeorSegmentDeltaTime
+                else if (type is ColumnType.SegmentTime or ColumnType.SegmentDeltaorSegmentTime)
                 {
                     TimeSpan? previousTime = TopSplit > 0 ? state.Run[TopSplit - 1].Comparisons[comparison][timingMethod] : TimeSpan.Zero;
                     label.Text = TimeFormatter.Format(Split.Comparisons[comparison][timingMethod] - previousTime);
+                }
+                else if (type is ColumnType.CustomVariable)
+                {
+                    if (splitIndex == state.CurrentSplitIndex)
+                    {
+                        label.Text = state.Run.Metadata.CustomVariableValue(data.Name) ?? "";
+                    }
+                    else if (splitIndex > state.CurrentSplitIndex)
+                    {
+                        label.Text = "";
+                    }
                 }
             }
 
@@ -1164,14 +1177,9 @@ public class SplitComponent : IComponent
 
     protected float CalculateLabelsWidth()
     {
-        if (ColumnsList != null)
+        if (ColumnWidths != null)
         {
-            int mixedCount = ColumnsList.Count(x => x.Type is ColumnType.DeltaorSplitTime or ColumnType.SegmentDeltaorSegmentTime);
-            int deltaCount = ColumnsList.Count(x => x.Type is ColumnType.Delta or ColumnType.SegmentDelta);
-            int timeCount = ColumnsList.Count(x => x.Type is ColumnType.SplitTime or ColumnType.SegmentTime);
-            return (mixedCount * (Math.Max(MeasureDeltaLabel.ActualWidth, MeasureTimeLabel.ActualWidth) + 5))
-                + (deltaCount * (MeasureDeltaLabel.ActualWidth + 5))
-                + (timeCount * (MeasureTimeLabel.ActualWidth + 5));
+            return ColumnWidths.Sum() + (5 * ColumnWidths.Count());
         }
 
         return 0f;
@@ -1229,10 +1237,12 @@ public class SplitComponent : IComponent
                 SimpleLabel label = LabelsList[index];
                 Cache["Columns" + index + "Text"] = label.Text;
                 Cache["Columns" + index + "Color"] = label.ForeColor.ToArgb();
+                if (index < ColumnWidths.Count)
+                {
+                    Cache["Columns" + index + "Width"] = ColumnWidths[index];
+                }
             }
 
-            Cache["MeasureTimeActualWidth"] = MeasureTimeLabel.ActualWidth;
-            Cache["MeasureDeltaActualWidth"] = MeasureDeltaLabel.ActualWidth;
             Cache["HeaderMeasureTimeActualWidth"] = HeaderMeasureTimeLabel.ActualWidth;
             Cache["HeaderMeasureDeltaActualWidth"] = HeaderMeasureDeltaLabel.ActualWidth;
             Cache["Header"] = Header;
