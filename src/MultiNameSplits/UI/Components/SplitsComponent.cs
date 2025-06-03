@@ -44,7 +44,7 @@ public class SplitsComponent : IComponent
     protected IEnumerable<ColumnData> ColumnsList => Settings.ColumnsList.Select(x => x.Data);
 
     public string ComponentName
-      => "Subsplits";
+      => "Multi Name Splits";
 
     public float VerticalHeight => InternalComponent.VerticalHeight;
 
@@ -74,6 +74,7 @@ public class SplitsComponent : IComponent
     private void state_RunManuallyModified(object sender, EventArgs e)
     {
         sectionList.UpdateSplits(((LiveSplitState)sender).Run);
+        Settings.MultiNameDisplayController.Reset();
     }
 
     private void state_ComparisonRenamed(object sender, EventArgs e)
@@ -410,9 +411,10 @@ public class SplitsComponent : IComponent
         int runningSectionIndex = Math.Min(Math.Max(state.CurrentSplitIndex, 0), state.Run.Count - 1);
         ScrollOffset = Math.Min(Math.Max(ScrollOffset, -runningSectionIndex), state.Run.Count - runningSectionIndex - 1);
         int currentSplit = ScrollOffset + runningSectionIndex;
-        int currentSection = sectionList.getSection(currentSplit);
-        runningSectionIndex = sectionList.getSection(runningSectionIndex);
-        if (sectionList.Sections[currentSection].getSubsplitCount() > 0)
+        int currentSection = Settings.EnableSubsplits ? sectionList.getSection(currentSplit) : 0;
+        runningSectionIndex = Settings.EnableSubsplits ? sectionList.getSection(runningSectionIndex) : 0;
+        
+        if (Settings.EnableSubsplits && sectionList.Sections[currentSection].getSubsplitCount() > 0)
         {
             lastSplitOfSection = sectionList.Sections[currentSection].endIndex;
         }
@@ -421,43 +423,51 @@ public class SplitsComponent : IComponent
             lastSplitOfSection = -1;
         }
 
-        if (Settings.HideSubsplits)
+        if (Settings.EnableSubsplits)
         {
-            if (ScrollOffset != 0)
+            if (Settings.HideSubsplits)
             {
-                currentSplit = sectionList.getMajorSplit(currentSplit);
-                SplitsSettings.HilightSplit = state.Run[currentSplit];
+                if (ScrollOffset != 0)
+                {
+                    currentSplit = sectionList.getMajorSplit(currentSplit);
+                    SplitsSettings.HilightSplit = state.Run[currentSplit];
+                }
+                else
+                {
+                    SplitsSettings.HilightSplit = null;
+                }
+
+                SplitsSettings.SectionSplit = state.Run[sectionList.Sections[runningSectionIndex].endIndex];
             }
             else
             {
-                SplitsSettings.HilightSplit = null;
-            }
+                if (ScrollOffset != 0)
+                {
+                    SplitsSettings.HilightSplit = state.Run[currentSplit];
+                }
+                else
+                {
+                    SplitsSettings.HilightSplit = null;
+                }
 
-            SplitsSettings.SectionSplit = state.Run[sectionList.Sections[runningSectionIndex].endIndex];
+                if (currentSection == runningSectionIndex)
+                {
+                    SplitsSettings.SectionSplit = null;
+                }
+                else
+                {
+                    SplitsSettings.SectionSplit = state.Run[sectionList.Sections[runningSectionIndex].endIndex];
+                }
+            }
         }
         else
         {
-            if (ScrollOffset != 0)
-            {
-                SplitsSettings.HilightSplit = state.Run[currentSplit];
-            }
-            else
-            {
-                SplitsSettings.HilightSplit = null;
-            }
-
-            if (currentSection == runningSectionIndex)
-            {
-                SplitsSettings.SectionSplit = null;
-            }
-            else
-            {
-                SplitsSettings.SectionSplit = state.Run[sectionList.Sections[runningSectionIndex].endIndex];
-            }
+            SplitsSettings.HilightSplit = null;
+            SplitsSettings.SectionSplit = null;
         }
 
         bool addLast = Settings.AlwaysShowLastSplit || currentSplit == state.Run.Count() - 1;
-        bool addHeader = Settings.ShowHeader && (sectionList.Sections[currentSection].getSubsplitCount() > 0);
+        bool addHeader = Settings.EnableSubsplits && Settings.ShowHeader && (sectionList.Sections[currentSection].getSubsplitCount() > 0);
 
         int freeSplits = visualSplitCount - (addLast ? 1 : 0) - (addHeader ? 1 : 0);
         int topSplit = currentSplit - 1;
@@ -622,13 +632,17 @@ public class SplitsComponent : IComponent
                     SplitComponents[i].CollapsedSplit = false;
                     SplitComponents[i].TopSplit = sectionList.Sections[-split - 1].startIndex;
                     SplitComponents[i].Split = state.Run[sectionList.Sections[-split - 1].endIndex];
-                    SplitComponents[i].oddSplit = ((-split - 1 + (Settings.ShowColumnLabels ? 1 : 0)) % 2) == 0;
+                    SplitComponents[i].oddSplit = Settings.EnableSubsplits 
+                        ? ((-split - 1 + (Settings.ShowColumnLabels ? 1 : 0)) % 2) == 0 
+                        : ((i + (Settings.ShowColumnLabels ? 1 : 0)) % 2) == 0;
                 }
                 else
                 {
                     SplitComponents[i].Header = false;
                     SplitComponents[i].Split = state.Run[split];
-                    SplitComponents[i].oddSplit = ((sectionList.getSection(split) + (Settings.ShowColumnLabels ? 1 : 0)) % 2) == 0;
+                    SplitComponents[i].oddSplit = Settings.EnableSubsplits 
+                        ? ((sectionList.getSection(split) + (Settings.ShowColumnLabels ? 1 : 0)) % 2) == 0 
+                        : ((i + (Settings.ShowColumnLabels ? 1 : 0)) % 2) == 0;
 
                     if ((Settings.HideSubsplits || sectionList.getSection(split) != currentSection)
                         && sectionList.Sections[sectionList.getSection(split)].getSubsplitCount() > 0
@@ -655,6 +669,11 @@ public class SplitsComponent : IComponent
 
     private bool ShouldIncludeSplit(int currentSection, int split)
     {
+        if (!Settings.EnableSubsplits)
+        {
+            return true;
+        }
+
         return (sectionList.isMajorSplit(split)
                    && (!Settings.CurrentSectionOnly || sectionList.getSection(split) == currentSection)) ||
                (!sectionList.isMajorSplit(split)

@@ -23,3 +23,9 @@ publish/
 .DS_Store
 .AppleDouble
 .LSOverride
+
+# dev
+docs/images/original/
+docs/MultiNameSplits.pdb
+docs/scripts/
+.cursor/

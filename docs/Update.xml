@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<updates>
+  <update version="0.0.0">
+    <files>
+      <file path="MultiNameSplits.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>update test 1</change>
+    </changelog>
+  </update>
+</updates>

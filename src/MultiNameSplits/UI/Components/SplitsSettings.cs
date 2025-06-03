@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using System.Xml;
+using System.Reflection;
 
 using LiveSplit.Model;
 using LiveSplit.Model.Comparisons;
@@ -112,6 +113,13 @@ public partial class SplitsSettings : UserControl
     public bool ShowColumnLabels { get; set; }
     public Color LabelsColor { get; set; }
 
+    public bool EnableSubsplits { get; set; }
+
+    public MultiNameDisplayController MultiNameDisplayController { get; set; }
+    public string MultiNameSeparator { get; set; }
+    public float MultiNameDisplayTime { get; set; }
+    public float MultiNameTransitionTime { get; set; }
+
     public Color BeforeNamesColor { get; set; }
     public Color CurrentNamesColor { get; set; }
     public Color AfterNamesColor { get; set; }
@@ -143,76 +151,142 @@ public partial class SplitsSettings : UserControl
         InitializeComponent();
 
         CurrentState = state;
-
+        
         StartingSize = Size;
         StartingTableLayoutSize = tableColumns.Size;
+        
+        // get settings from anothor component
+        Dictionary<string, object> baseSettings = null;
+        string foundComponentName = null;
 
-        AutomaticAbbreviation = false;
-        VisualSplitCount = 8;
-        SplitPreviewCount = 1;
-        MinimumMajorSplits = 0;
-        DisplayIcons = true;
-        IconShadows = true;
-        ShowThinSeparators = false;
-        AlwaysShowLastSplit = true;
-        LockLastSplit = true;
-        SeparatorLastSplit = true;
-        SplitTimesAccuracy = TimeAccuracy.Seconds;
-        CurrentSplitTopColor = Color.FromArgb(51, 115, 244);
-        CurrentSplitBottomColor = Color.FromArgb(21, 53, 116);
-        SplitWidth = 20;
-        SplitHeight = 3.6f;
-        ScaledSplitHeight = 60;
-        IconSize = 24f;
-        BeforeNamesColor = Color.FromArgb(255, 255, 255);
-        CurrentNamesColor = Color.FromArgb(255, 255, 255);
-        AfterNamesColor = Color.FromArgb(255, 255, 255);
-        OverrideTextColor = false;
-        BeforeTimesColor = Color.FromArgb(255, 255, 255);
-        CurrentTimesColor = Color.FromArgb(255, 255, 255);
-        AfterTimesColor = Color.FromArgb(255, 255, 255);
-        OverrideTimesColor = false;
-        CurrentSplitGradient = GradientType.Vertical;
+        if (state.Layout != null)
+        {
+            foreach (var target_component_name in new[] { "Multi Name Splits", "Subsplits", "Splits" })
+            {
+                foreach (var component in state.Layout.Components)
+                {
+                    if (component.GetType().Name == "SplitsComponent" && component.ComponentName == target_component_name)
+                    {
+                        foundComponentName = target_component_name;
+                        var baseSettingsObj = component.GetSettingsControl(state.Layout.Mode);
+                        if (baseSettingsObj != null)
+                        {
+                            try
+                            {
+                                baseSettings = baseSettingsObj.GetType()
+                                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                    .Where(p => p.CanRead)
+                                    .ToDictionary(
+                                        p => p.Name,
+                                        p => p.GetValue(baseSettingsObj, null)
+                                    );
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[MultiNameSplits] Error getting settings: {ex.Message}");
+                            }
+                        }
+                        break;
+                    }
+                }
+                if (baseSettings != null)
+                {
+                    break;
+                }
+            }
+        }
+
+        T getInitVal<T>(string key, T val)
+        {
+            try
+            {
+                if (baseSettings != null && baseSettings.ContainsKey(key))
+                {
+                    var valType = typeof(T);
+                    if (valType.IsEnum)
+                    {
+                        return (T)Enum.Parse(valType, baseSettings[key].ToString());
+                    }
+                    return (T)Convert.ChangeType(baseSettings[key], valType);
+                }
+            }
+            catch
+            {
+                // do nothing
+            }
+
+            return val;
+        }
+
+        AutomaticAbbreviation = getInitVal("AutomaticAbbreviation", false);
+        VisualSplitCount = getInitVal("VisualSplitCount", 8);
+        SplitPreviewCount = getInitVal("SplitPreviewCount", 1);
+        MinimumMajorSplits = getInitVal("MinimumMajorSplits", 0);
+        DisplayIcons = getInitVal("DisplayIcons", true);
+        IconShadows = getInitVal("IconShadows", true);
+        ShowThinSeparators = getInitVal("ShowThinSeparators", false);
+        AlwaysShowLastSplit = getInitVal("AlwaysShowLastSplit", true);
+        LockLastSplit = getInitVal("LockLastSplit", true);
+        SeparatorLastSplit = getInitVal("SeparatorLastSplit", true);
+        SplitTimesAccuracy = getInitVal("SplitTimesAccuracy", TimeAccuracy.Seconds);
+        CurrentSplitTopColor = getInitVal("CurrentSplitTopColor", Color.FromArgb(51, 115, 244));
+        CurrentSplitBottomColor = getInitVal("CurrentSplitBottomColor", Color.FromArgb(21, 53, 116));
+        SplitWidth = getInitVal("SplitWidth", 20);
+        SplitHeight = getInitVal("SplitHeight", 3.6f);
+        ScaledSplitHeight = getInitVal("ScaledSplitHeight", 60);
+        IconSize = getInitVal("IconSize", 24f);
+        BeforeNamesColor = getInitVal("BeforeNamesColor", Color.FromArgb(255, 255, 255));
+        CurrentNamesColor = getInitVal("CurrentNamesColor", Color.FromArgb(255, 255, 255));
+        AfterNamesColor = getInitVal("AfterNamesColor", Color.FromArgb(255, 255, 255));
+        OverrideTextColor = getInitVal("OverrideTextColor", false);
+        BeforeTimesColor = getInitVal("BeforeTimesColor", Color.FromArgb(255, 255, 255));
+        CurrentTimesColor = getInitVal("CurrentTimesColor", Color.FromArgb(255, 255, 255));
+        AfterTimesColor = getInitVal("AfterTimesColor", Color.FromArgb(255, 255, 255));
+        OverrideTimesColor = getInitVal("OverrideTimesColor", false);
+        CurrentSplitGradient = getInitVal("CurrentSplitGradient", GradientType.Vertical);
         cmbSplitGradient.SelectedIndexChanged += cmbSplitGradient_SelectedIndexChanged;
-        BackgroundColor = Color.Transparent;
-        BackgroundColor2 = Color.FromArgb(1, 255, 255, 255);
-        BackgroundGradient = ExtendedGradientType.Alternating;
-        DropDecimals = true;
-        DeltasAccuracy = TimeAccuracy.Tenths;
-        OverrideDeltasColor = false;
-        DeltasColor = Color.FromArgb(255, 255, 255);
-        HeaderComparison = "Current Comparison";
-        HeaderTimingMethod = "Current Timing Method";
-        Display2Rows = false;
-        ShowColumnLabels = false;
-        LabelsColor = Color.FromArgb(255, 255, 255);
-
-        IndentBlankIcons = true;
-        IndentSubsplits = true;
-        HideSubsplits = false;
-        ShowSubsplits = false;
-        CurrentSectionOnly = false;
-        OverrideSubsplitColor = false;
-        SubsplitTopColor = Color.FromArgb(0x8D, 0x00, 0x00, 0x00);
-        SubsplitBottomColor = Color.Transparent;
-        SubsplitGradient = GradientType.Plain;
-        ShowHeader = true;
-        IndentSectionSplit = true;
-        ShowIconSectionSplit = true;
-        ShowSectionIcon = true;
-        HeaderTopColor = Color.FromArgb(0x2B, 0xFF, 0xFF, 0xFF);
-        HeaderBottomColor = Color.FromArgb(0xD8, 0x00, 0x00, 0x00);
-        HeaderGradient = GradientType.Vertical;
-        OverrideHeaderColor = false;
-        HeaderTextColor = Color.FromArgb(255, 255, 255);
-        HeaderText = true;
-        HeaderTimesColor = Color.FromArgb(255, 255, 255);
-        HeaderTimes = true;
-        HeaderAccuracy = TimeAccuracy.Tenths;
-        SectionTimer = true;
-        SectionTimerColor = Color.FromArgb(0x77, 0x77, 0x77);
-        SectionTimerGradient = true;
-        SectionTimerAccuracy = TimeAccuracy.Tenths;
+        BackgroundColor = getInitVal("BackgroundColor", Color.Transparent);
+        BackgroundColor2 = getInitVal("BackgroundColor2", Color.FromArgb(1, 255, 255, 255));
+        BackgroundGradient = getInitVal("BackgroundGradient", ExtendedGradientType.Alternating);
+        DropDecimals = getInitVal("DropDecimals", true);
+        DeltasAccuracy = getInitVal("DeltasAccuracy", TimeAccuracy.Tenths);
+        OverrideDeltasColor = getInitVal("OverrideDeltasColor", false);
+        DeltasColor = getInitVal("DeltasColor", Color.FromArgb(255, 255, 255));
+        HeaderComparison = getInitVal("HeaderComparison", "Current Comparison");
+        HeaderTimingMethod = getInitVal("HeaderTimingMethod", "Current Timing Method");
+        Display2Rows = getInitVal("Display2Rows", false);
+        ShowColumnLabels = getInitVal("ShowColumnLabels", false);
+        LabelsColor = getInitVal("LabelsColor", Color.FromArgb(255, 255, 255));
+        IndentBlankIcons = getInitVal("IndentBlankIcons", true);
+        IndentSubsplits = getInitVal("IndentSubsplits", true);
+        HideSubsplits = getInitVal("HideSubsplits", false);
+        ShowSubsplits = getInitVal("ShowSubsplits", false);
+        CurrentSectionOnly = getInitVal("CurrentSectionOnly", false);
+        OverrideSubsplitColor = getInitVal("OverrideSubsplitColor", false);
+        SubsplitTopColor = getInitVal("SubsplitTopColor", Color.FromArgb(0x8D, 0x00, 0x00, 0x00));
+        SubsplitBottomColor = getInitVal("SubsplitBottomColor", Color.Transparent);
+        SubsplitGradient = getInitVal("SubsplitGradient", GradientType.Plain);
+        ShowHeader = getInitVal("ShowHeader", true);
+        IndentSectionSplit = getInitVal("IndentSectionSplit", true);
+        ShowIconSectionSplit = getInitVal("ShowIconSectionSplit", true);
+        ShowSectionIcon = getInitVal("ShowSectionIcon", true);
+        HeaderTopColor = getInitVal("HeaderTopColor", Color.FromArgb(0x2B, 0xFF, 0xFF, 0xFF));
+        HeaderBottomColor = getInitVal("HeaderBottomColor", Color.FromArgb(0xD8, 0x00, 0x00, 0x00));
+        HeaderGradient = getInitVal("HeaderGradient", GradientType.Vertical);
+        OverrideHeaderColor = getInitVal("OverrideHeaderColor", false);
+        HeaderTextColor = getInitVal("HeaderTextColor", Color.FromArgb(255, 255, 255));
+        HeaderText = getInitVal("HeaderText", true);
+        HeaderTimesColor = getInitVal("HeaderTimesColor", Color.FromArgb(255, 255, 255));
+        HeaderTimes = getInitVal("HeaderTimes", true);
+        HeaderAccuracy = getInitVal("HeaderAccuracy", TimeAccuracy.Tenths);
+        SectionTimer = getInitVal("SectionTimer", true);
+        SectionTimerColor = getInitVal("SectionTimerColor", Color.FromArgb(0x77, 0x77, 0x77));
+        SectionTimerGradient = getInitVal("SectionTimerGradient", true);
+        SectionTimerAccuracy = getInitVal("SectionTimerAccuracy", TimeAccuracy.Tenths);
+        MultiNameSeparator = getInitVal("MultiNameSeparator", "/");
+        MultiNameDisplayTime = getInitVal("MultiNameDisplayTime", 10.0f);
+        MultiNameTransitionTime = getInitVal("MultiNameTransitionTime", 1.0f);
+        EnableSubsplits = getInitVal("EnableSubsplits", foundComponentName == "Splits" ? false : true);
 
         chkAutomaticAbbreviation.DataBindings.Add("Checked", this, "AutomaticAbbreviation", false, DataSourceUpdateMode.OnPropertyChanged);
         dmnTotalSegments.DataBindings.Add("Value", this, "VisualSplitCount", false, DataSourceUpdateMode.OnPropertyChanged);
@@ -272,11 +346,44 @@ public partial class SplitsSettings : UserControl
 
         btnLabelColor.DataBindings.Add("BackColor", this, "LabelsColor", false, DataSourceUpdateMode.OnPropertyChanged);
 
+        txtMultiNameSeparator.DataBindings.Add("Text", this, "MultiNameSeparator", false, DataSourceUpdateMode.OnPropertyChanged);
+        txtMultiNameDisplayTime.DataBindings.Add("Text", this, "MultiNameDisplayTime", false, DataSourceUpdateMode.OnPropertyChanged);
+        txtMultiNameTransitionTime.DataBindings.Add("Text", this, "MultiNameTransitionTime", false, DataSourceUpdateMode.OnPropertyChanged);
+        txtMultiNameSeparator.TextChanged += txtMultiNameSeparator_TextChanged;
+        txtMultiNameSeparator.Leave += txtMultiNameSeparator_Leave;
+        txtMultiNameTransitionTime.ValueChanged += txtMultiNameTransitionTime_ValueChanged;
+        txtMultiNameDisplayTime.ValueChanged += txtMultiNameDisplayTime_ValueChanged;
+        
+        chkEnableSubsplits.DataBindings.Add("Checked", this, "EnableSubsplits", false, DataSourceUpdateMode.OnPropertyChanged);
+        chkEnableSubsplits.CheckedChanged += chkEnableSubsplits_CheckedChanged;
+        
         ColumnsList = [];
         ColumnsList.Add(new ColumnSettings(CurrentState, "+/-", ColumnsList) { Data = new ColumnData("+/-", ColumnType.Delta, "Current Comparison", "Current Timing Method") });
         ColumnsList.Add(new ColumnSettings(CurrentState, "Time", ColumnsList) { Data = new ColumnData("Time", ColumnType.SplitTime, "Current Comparison", "Current Timing Method") });
 
-        startingColumnSettingHeight = ColumnsList[0].Height;
+        startingColumnSettingHeight = ColumnsList[0].Height + 5;
+
+        MultiNameDisplayController = new MultiNameDisplayController(this);
+        if (state.Layout != null)
+        {
+            MultiNameDisplayController.Reset();
+        }
+
+        // Emphasize group names
+        foreach (Control panel1_child in tableLayoutPanel1.Controls)
+        {
+            if (panel1_child is GroupBox groupBox)
+            {
+                groupBox.Font = new Font(groupBox.Font.FontFamily, groupBox.Font.Size, FontStyle.Bold);
+                groupBox.ForeColor = Color.FromArgb(0, 120, 70);
+
+                foreach (Control group_child in groupBox.Controls)
+                {
+                    group_child.Font = new Font(group_child.Font.FontFamily, group_child.Font.Size, FontStyle.Regular);
+                    group_child.ForeColor = Color.Black;
+                }
+            }
+        }
     }
 
     private void chkColumnLabels_CheckedChanged(object sender, EventArgs e)
@@ -472,6 +579,7 @@ public partial class SplitsSettings : UserControl
         chkSectionTimer_CheckedChanged(null, null);
         chkDisplayIcons_CheckedChanged(null, null);
         chkColumnLabels_CheckedChanged(null, null);
+        chkEnableSubsplits_CheckedChanged(null, null);
 
         cmbHeaderComparison.Items.Clear();
         cmbHeaderComparison.Items.Add("Current Comparison");
@@ -540,7 +648,7 @@ public partial class SplitsSettings : UserControl
     {
         var element = (XmlElement)node;
         Version version = SettingsHelper.ParseVersion(element["Version"]);
-
+        
         AutomaticAbbreviation = SettingsHelper.ParseBool(element["AutomaticAbbreviation"], false);
         CurrentSplitTopColor = SettingsHelper.ParseColor(element["CurrentSplitTopColor"], Color.FromArgb(51, 115, 244));
         CurrentSplitBottomColor = SettingsHelper.ParseColor(element["CurrentSplitBottomColor"], Color.FromArgb(21, 53, 116));
@@ -599,6 +707,13 @@ public partial class SplitsSettings : UserControl
         ShowColumnLabels = SettingsHelper.ParseBool(element["ShowColumnLabels"], false);
         LabelsColor = SettingsHelper.ParseColor(element["LabelsColor"], Color.FromArgb(255, 255, 255));
 
+        MultiNameSeparator = SettingsHelper.ParseString(element["MultiNameSeparator"], "/");
+        MultiNameDisplayTime = SettingsHelper.ParseFloat(element["MultiNameDisplayTime"], 10.0f);
+        MultiNameTransitionTime = SettingsHelper.ParseFloat(element["MultiNameTransitionTime"], 1.0f);
+        EnableSubsplits = SettingsHelper.ParseBool(element["EnableSubsplits"], true);
+
+        MultiNameDisplayController.Reset();
+        
         if (version >= new Version(1, 7))
         {
             HeaderComparison = SettingsHelper.ParseString(element["HeaderComparison"], "Current Comparison");
@@ -729,6 +844,11 @@ public partial class SplitsSettings : UserControl
         SettingsHelper.CreateSetting(document, parent, "SectionTimerColor", SectionTimerColor) ^
         SettingsHelper.CreateSetting(document, parent, "ShowColumnLabels", ShowColumnLabels) ^
         SettingsHelper.CreateSetting(document, parent, "LabelsColor", LabelsColor);
+
+        hashCode ^= SettingsHelper.CreateSetting(document, parent, "MultiNameSeparator", MultiNameSeparator);
+        hashCode ^= SettingsHelper.CreateSetting(document, parent, "MultiNameDisplayTime", MultiNameDisplayTime);
+        hashCode ^= SettingsHelper.CreateSetting(document, parent, "MultiNameTransitionTime", MultiNameTransitionTime);
+        hashCode ^= SettingsHelper.CreateSetting(document, parent, "EnableSubsplits", EnableSubsplits);
 
         XmlElement columnsElement = null;
         if (document != null)
@@ -1001,5 +1121,98 @@ public partial class SplitsSettings : UserControl
     private void chkAutomaticAbbreviation_CheckedChanged(object sender, EventArgs e)
     {
         AutomaticAbbreviation = chkAutomaticAbbreviation.Checked;
+    }
+
+    private void txtMultiNameSeparator_TextChanged(object sender, EventArgs e)
+    {
+        string invalidChars = "{}-";
+        bool isInvalid = false;
+        int selectionStart = txtMultiNameSeparator.SelectionStart;
+        string fixedText = MultiNameDisplayController.ConvertFullToHalf(txtMultiNameSeparator.Text);
+        
+        txtMultiNameSeparator.Text = fixedText;
+
+        foreach (char c in invalidChars)
+        {
+            if (fixedText.Contains(c))
+            {
+                isInvalid = true;
+                fixedText = fixedText.Replace(c.ToString(), "");
+            }
+        }
+
+        if (isInvalid)
+        {
+            selectionStart = selectionStart - (txtMultiNameSeparator.Text.Length - fixedText.Length);
+            txtMultiNameSeparator.Text = fixedText;
+            lblMultiNameSeparatorMessage.Text = "Invalid characters: { } -";
+            lblMultiNameSeparatorMessage.ForeColor = Color.Red;
+            lblMultiNameSeparatorMessage.Visible = true;
+        }
+        else
+        {   
+            MultiNameSeparator_Notice();
+        }
+        txtMultiNameSeparator.SelectionStart = selectionStart;
+        MultiNameSeparator = fixedText;
+        MultiNameDisplayController.Reset();
+    }
+
+    private void txtMultiNameSeparator_Leave(object sender, EventArgs e)
+    {
+        MultiNameSeparator_Notice();
+    }
+
+    private void txtMultiNameDisplayTime_ValueChanged(object sender, EventArgs e)
+    {
+        MultiNameTransitionTime_Notice();
+    }
+    private void txtMultiNameTransitionTime_ValueChanged(object sender, EventArgs e)
+    {
+        MultiNameTransitionTime_Notice();
+    }
+
+    private void MultiNameSeparator_Notice()
+    {
+        if (txtMultiNameSeparator.Text.Contains(' '))
+        {
+            lblMultiNameSeparatorMessage.Text = "Notice: Contains spaces";
+            lblMultiNameSeparatorMessage.ForeColor = Color.FromArgb(190, 80, 0);
+            lblMultiNameSeparatorMessage.Visible = true;
+        }
+        else
+        {
+            lblMultiNameSeparatorMessage.Visible = false;
+        }
+    }
+
+    private void MultiNameTransitionTime_Notice()
+    {
+        if ((decimal)txtMultiNameTransitionTime.Value > (decimal)txtMultiNameDisplayTime.Value / 2)
+        {
+            lblMultiNameTransitionTimeMessage.Text = "Notice: May cause unexpected behavior when greater than half of Display Time";
+            lblMultiNameTransitionTimeMessage.ForeColor = Color.FromArgb(190, 80, 0);
+            lblMultiNameTransitionTimeMessage.Visible = true;
+        }
+        else
+        {
+            lblMultiNameTransitionTimeMessage.Visible = false;
+        }
+    }
+
+    private void chkEnableSubsplits_CheckedChanged(object sender, EventArgs e)
+    {
+        bool enabled = chkEnableSubsplits.Checked;
+        EnableSubsplits = enabled;
+
+        foreach (Control childControl in GroupBox9.Controls)
+        {
+            if (childControl != tableLayoutPanelEnableSubsplits)
+            {
+                childControl.Enabled = enabled;
+            }
+        }
+
+        MultiNameDisplayController.Reset();
     }
 }

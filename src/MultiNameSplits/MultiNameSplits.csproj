@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>LiveSplit</RootNamespace>
+    <UseWindowsForms>true</UseWindowsForms>
+    <TargetFramework>net4.8.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <LSPath>..\..\..\LiveSplit</LSPath>
+    <ProductPath>..\..\..\..\apps\LiveSplit</ProductPath>
+    <Platforms>AnyCPU</Platforms>
+    <EnableDynamicLoading>false</EnableDynamicLoading>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(LSPath)\src\LiveSplit.Core\LiveSplit.Core.csproj" Private="false" ExcludeAssets="runtime" />
+    <ProjectReference Include="$(LSPath)\src\UpdateManager\UpdateManager.csproj" Private="false" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PolySharp" Version="1.14.1" PrivateAssets="all" />
+  </ItemGroup>
+
+  <Target Name="CopyToLiveSplitComponentsForDebug" Condition="'$(Configuration)' == 'Debug'" AfterTargets="Build">
+    <ItemGroup>
+      <OutputFiles Include="$(TargetDir)$(TargetName).dll" />
+      <OutputFiles Include="$(TargetDir)$(TargetName).pdb" />
+    </ItemGroup>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(LSPath)\bin\debug\Components\" />
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="..\..\docs\" />
+  </Target>
+
+  <Target Name="CopyToLiveSplitComponentsForRelease" Condition="'$(Configuration)' == 'Release'" AfterTargets="Build">
+    <ItemGroup>
+      <OutputFiles Include="$(TargetDir)$(TargetName).dll" />
+      <OutputFiles Include="$(TargetDir)$(TargetName).pdb" />
+    </ItemGroup>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(ProductPath)\Components\" />
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(ProductPath)_1.8.30\Components\" />
+  </Target>
+  
+</Project>

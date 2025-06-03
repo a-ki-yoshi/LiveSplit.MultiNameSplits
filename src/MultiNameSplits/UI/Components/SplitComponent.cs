@@ -20,7 +20,7 @@ public class SplitComponent : IComponent
     public bool CollapsedSplit { get; set; }
     public bool oddSplit { get; set; }
 
-    private bool Indent => Settings.IndentSubsplits && (IsSubsplit || ForceIndent);
+    private bool Indent => Settings.EnableSubsplits && Settings.IndentSubsplits && (IsSubsplit || ForceIndent);
 
     public ISegment Split { get; set; }
     protected bool blankOut = false;
@@ -68,7 +68,7 @@ public class SplitComponent : IComponent
     public IEnumerable<ColumnData> ColumnsList { get; set; }
     public IList<SimpleLabel> LabelsList { get; set; }
 
-    private readonly Regex SubsplitRegex = new(@"^{(.+)}\s*(.+)$", RegexOptions.Compiled);
+    public static Regex SubsplitRegex = new(@"^{(.+)}\s*(.+)$", RegexOptions.Compiled);
 
     public float VerticalHeight { get; set; }
 
@@ -178,8 +178,8 @@ public class SplitComponent : IComponent
         TimeLabel.SetActualWidth(g);
         DeltaLabel.SetActualWidth(g);
 
-        NameLabel.ShadowColor = state.LayoutSettings.ShadowsColor;
-        NameLabel.OutlineColor = state.LayoutSettings.TextOutlineColor;
+        //NameLabel.ShadowColor = state.LayoutSettings.ShadowsColor;
+        //NameLabel.OutlineColor = state.LayoutSettings.TextOutlineColor;
         foreach (SimpleLabel label in LabelsList)
         {
             label.ShadowColor = state.LayoutSettings.ShadowsColor;
@@ -388,8 +388,8 @@ public class SplitComponent : IComponent
         TimeLabel.SetActualWidth(g);
         DeltaLabel.SetActualWidth(g);
 
-        NameLabel.ShadowColor = state.LayoutSettings.ShadowsColor;
-        NameLabel.OutlineColor = state.LayoutSettings.TextOutlineColor;
+        //NameLabel.ShadowColor = state.LayoutSettings.ShadowsColor;
+        //NameLabel.OutlineColor = state.LayoutSettings.TextOutlineColor;
         TimeLabel.ShadowColor = state.LayoutSettings.ShadowsColor;
         TimeLabel.OutlineColor = state.LayoutSettings.TextOutlineColor;
         DeltaLabel.ShadowColor = state.LayoutSettings.ShadowsColor;
@@ -589,7 +589,7 @@ public class SplitComponent : IComponent
         }
     }
 
-    public string ComponentName => "Split";
+    public string ComponentName => "Multi Name Split";
 
     public Control GetSettingsControl(LayoutMode mode)
     {
@@ -692,7 +692,7 @@ public class SplitComponent : IComponent
                         ((!Settings.HideSubsplits && state.CurrentSplit == Split) ||
                         (SplitsSettings.SectionSplit != null && SplitsSettings.SectionSplit == Split));
             IsHighlight = SplitsSettings.HilightSplit == Split;
-            IsSubsplit = Split.Name.StartsWith("-") && Split != state.Run.Last();
+            IsSubsplit = Settings.EnableSubsplits && Split.Name.StartsWith("-") && Split != state.Run.Last();
 
             if (IsSubsplit)
             {
@@ -701,7 +701,7 @@ public class SplitComponent : IComponent
             else
             {
                 Match match = SubsplitRegex.Match(Split.Name);
-                if (match.Success)
+                if (match.Success && Settings.EnableSubsplits)
                 {
                     if (CollapsedSplit || Header)
                     {
@@ -1212,6 +1212,8 @@ public class SplitComponent : IComponent
                     FrameCount = Split.Icon.GetFrameCount(new FrameDimension(Split.Icon.FrameDimensionsList[0]));
                 }
             }
+
+            NameLabel = Settings.MultiNameDisplayController.ModLabel(state, NameLabel);
 
             Cache["SplitName"] = NameLabel.Text;
             Cache["DeltaLabel"] = DeltaLabel.Text;
