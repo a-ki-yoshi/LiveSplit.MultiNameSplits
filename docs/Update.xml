@@ -1,5 +1,13 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <updates>
+  <update version="0.0.3">
+    <files>
+      <file path="0.0.3/MultiNameSplits.dll" localPath="Components/MultiNameSplits.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>update test 4</change>
+    </changelog>
+  </update>
   <update version="0.0.2">
     <files>
       <file path="0.0.2/MultiNameSplits.dll" localPath="Components/MultiNameSplits.dll" status="changed" />

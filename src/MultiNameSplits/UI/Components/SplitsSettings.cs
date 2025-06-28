@@ -361,7 +361,7 @@ public partial class SplitsSettings : UserControl
         ColumnsList.Add(new ColumnSettings(CurrentState, "+/-", ColumnsList) { Data = new ColumnData("+/-", ColumnType.Delta, "Current Comparison", "Current Timing Method") });
         ColumnsList.Add(new ColumnSettings(CurrentState, "Time", ColumnsList) { Data = new ColumnData("Time", ColumnType.SplitTime, "Current Comparison", "Current Timing Method") });
 
-        startingColumnSettingHeight = ColumnsList[0].Height + 25;
+        startingColumnSettingHeight = ColumnsList[0].Height + 15;
 
         MultiNameDisplayController = new MultiNameDisplayController(this);
         if (state.Layout != null)

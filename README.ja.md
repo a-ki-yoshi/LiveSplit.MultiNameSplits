@@ -31,7 +31,7 @@ LiveSplitのスプリット名を一定時間ごとに自動で切り替えて�
 ### 1. ダウンロード
 
 `MultiNameSplits.dll` ファイルをダウンロードしてください：
-- **最新版はこちら→** [**MultiNameSplits.dll**](https://github.com/a-ki-yoshi/LiveSplit.MultiNameSplits/releases/download/0.0.2/MultiNameSplits.dll)
+- **最新版はこちら→** [**MultiNameSplits.dll**](https://github.com/a-ki-yoshi/LiveSplit.MultiNameSplits/releases/download/0.0.3/MultiNameSplits.dll)
 - その他のバージョンは[GitHub Releases](https://github.com/a-ki-yoshi/LiveSplit.MultiNameSplits/releases) をご覧ください
 - dllとか聞きなれてなくて怖いかもしれませんが、襲ってこないので大丈夫です
 
