@@ -26,7 +26,6 @@
       <OutputFiles Include="$(TargetDir)$(TargetName).pdb" />
     </ItemGroup>
     <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(LSPath)\bin\debug\Components\" />
-    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="..\..\docs\" />
   </Target>
 
   <Target Name="CopyToLiveSplitComponentsForRelease" Condition="'$(Configuration)' == 'Release'" AfterTargets="Build">
@@ -34,6 +33,7 @@
       <OutputFiles Include="$(TargetDir)$(TargetName).dll" />
       <OutputFiles Include="$(TargetDir)$(TargetName).pdb" />
     </ItemGroup>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="..\..\docs\" />
     <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(ProductPath)\Components\" />
     <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(ProductPath)_1.8.30\Components\" />
   </Target>

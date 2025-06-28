@@ -25,5 +25,5 @@ public class SplitsComponentFactory : IComponentFactory
     public string UpdateURL => "https://raw.githubusercontent.com/a-ki-yoshi/LiveSplit.MultiNameSplits/master/docs/";
     public string XMLURL => UpdateURL + "Update.xml";
 
-    public Version Version => Version.Parse("0.0.0");
+    public Version Version => Version.Parse("0.0.1");
 }
