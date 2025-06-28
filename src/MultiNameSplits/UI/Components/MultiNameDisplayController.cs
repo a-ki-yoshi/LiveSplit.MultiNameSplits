@@ -146,7 +146,9 @@ public class MultiNameDisplayController
                 }
                 else
                 {
+                    #if DEBUG
                     Trace.WriteLine($"[MultiNameSplits] Invalid SplitNameIndex: {SplitNameIndex}, Array length: {cachedResult.Length}");
+                    #endif
                     SplitNameIndex = 0;
                     cache = cachedResult[0];
                 }
@@ -174,7 +176,9 @@ public class MultiNameDisplayController
                 }
                 else
                 {
+                    #if DEBUG
                     Trace.WriteLine($"[MultiNameSplits] Invalid SplitNameIndex after creation: {SplitNameIndex}, Array length: {InfoCacheDict[nameLabel.Text].Length}");
+                    #endif
                     SplitNameIndex = 0;
                     cache = InfoCacheDict[nameLabel.Text][0];
                 }

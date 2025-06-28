@@ -183,7 +183,9 @@ public partial class SplitsSettings : UserControl
                             }
                             catch (Exception ex)
                             {
+                                #if DEBUG
                                 System.Diagnostics.Debug.WriteLine($"[MultiNameSplits] Error getting settings: {ex.Message}");
+                                #endif
                             }
                         }
                         break;
@@ -361,7 +363,7 @@ public partial class SplitsSettings : UserControl
         ColumnsList.Add(new ColumnSettings(CurrentState, "+/-", ColumnsList) { Data = new ColumnData("+/-", ColumnType.Delta, "Current Comparison", "Current Timing Method") });
         ColumnsList.Add(new ColumnSettings(CurrentState, "Time", ColumnsList) { Data = new ColumnData("Time", ColumnType.SplitTime, "Current Comparison", "Current Timing Method") });
 
-        startingColumnSettingHeight = ColumnsList[0].Height + 15;
+        startingColumnSettingHeight = ColumnsList[0].Height + 5;
 
         MultiNameDisplayController = new MultiNameDisplayController(this);
         if (state.Layout != null)

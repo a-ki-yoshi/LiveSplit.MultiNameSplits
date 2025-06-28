@@ -31,7 +31,7 @@ This component is based on the Subsplits component, with new features added. It 
 ### 1. Download
 
 Download the `MultiNameSplits.dll` file:
-- **Latest version →** [**MultiNameSplits.dll**](https://github.com/a-ki-yoshi/LiveSplit.MultiNameSplits/releases/download/0.0.3/MultiNameSplits.dll)
+- **Latest version →** [**MultiNameSplits.dll**](https://github.com/a-ki-yoshi/LiveSplit.MultiNameSplits/releases/download/1.0.0/MultiNameSplits.dll)
 - For other versions, see [GitHub Releases](https://github.com/a-ki-yoshi/LiveSplit.MultiNameSplits/releases)
 - If you're not familiar with DLL files, don't worry—they're safe!
 
