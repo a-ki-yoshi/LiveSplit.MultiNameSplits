@@ -1,5 +1,13 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <updates>
+  <update version="1.0.1">
+    <files>
+      <file path="1.0.1/MultiNameSplits.dll" localPath="Components/MultiNameSplits.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Layout Editor - Design of "Columns" Section (#1)</change>
+    </changelog>
+  </update>
   <update version="1.0.0">
     <files>
       <file path="1.0.0/MultiNameSplits.dll" localPath="Components/MultiNameSplits.dll" status="changed" />
