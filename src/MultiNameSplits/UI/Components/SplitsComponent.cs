@@ -65,6 +65,8 @@ public class SplitsComponent : IComponent
 
     public IDictionary<string, Action> ContextMenuControls => null;
 
+    private Dictionary<Type, System.Reflection.PropertyInfo> _customVariablePropDictCache = new();
+
     public SplitsComponent(LiveSplitState state)
     {
         CurrentState = state;
@@ -735,9 +737,17 @@ public class SplitsComponent : IComponent
                 else if (column.Type is ColumnType.CustomVariable)
                 {
                     int longest_length = run.Metadata.CustomVariableValue(column.Name).Length;
+
                     foreach (ISegment split in run)
                     {
-                        if (split.CustomVariableValues.TryGetValue(column.Name, out string value) && !string.IsNullOrEmpty(value))
+                        if (!_customVariablePropDictCache.TryGetValue(split.GetType(), out System.Reflection.PropertyInfo property))
+                        {
+                            property = split.GetType().GetProperty("CustomVariableValues");
+                            _customVariablePropDictCache[split.GetType()] = property;
+                        }
+
+                        var dict = property.GetValue(split) as IDictionary<string, string>;
+                        if (dict.TryGetValue(column.Name, out string value) && !string.IsNullOrEmpty(value))
                         {
                             longest_length = Math.Max(longest_length, value.Length);
                         }

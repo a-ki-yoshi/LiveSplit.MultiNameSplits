@@ -20,6 +20,18 @@ public class SplitComponent : IComponent
     public bool CollapsedSplit { get; set; }
     public bool oddSplit { get; set; }
 
+    private System.Reflection.PropertyInfo _customVariablePropertyCache = null;
+
+    private IDictionary<string, string> GetCustomVariableDict(ISegment split)
+    {
+        if (_customVariablePropertyCache == null)
+        {
+            _customVariablePropertyCache = split.GetType().GetProperty("CustomVariableValues");
+        }
+
+        return _customVariablePropertyCache.GetValue(split) as IDictionary<string, string>;
+    }
+
     private bool Indent => Settings.EnableSubsplits && Settings.IndentSubsplits && (IsSubsplit || ForceIndent);
 
     public ISegment Split { get; set; }
@@ -860,7 +872,7 @@ public class SplitComponent : IComponent
                 }
                 else if (type == ColumnType.CustomVariable)
                 {
-                    Split.CustomVariableValues.TryGetValue(data.Name, out string text);
+                    GetCustomVariableDict(Split).TryGetValue(data.Name, out string text);
                     label.Text = text ?? "";
                 }
             }
@@ -1043,7 +1055,7 @@ public class SplitComponent : IComponent
                 }
                 else if (type == ColumnType.CustomVariable)
                 {
-                    Split.CustomVariableValues.TryGetValue(data.Name, out string text);
+                    GetCustomVariableDict(Split).TryGetValue(data.Name, out string text);
                     label.Text = text ?? "";
                 }
             }
