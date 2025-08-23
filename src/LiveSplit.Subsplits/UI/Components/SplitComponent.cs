@@ -65,7 +65,7 @@ public class SplitComponent : IComponent
 
     public IEnumerable<ColumnData> ColumnsList { get; set; }
     public IList<SimpleLabel> LabelsList { get; set; }
-    protected List<float> ColumnWidths { get; }
+    protected List<(int exLength, float exWidth, float width)> ColumnWidths { get; }
 
     private readonly Regex SubsplitRegex = new(@"^{(.+)}\s*(.+)$", RegexOptions.Compiled);
 
@@ -80,7 +80,7 @@ public class SplitComponent : IComponent
 
     public IDictionary<string, Action> ContextMenuControls => null;
 
-    public SplitComponent(SplitsSettings settings, IEnumerable<ColumnData> columnsList, List<float> columnWidths)
+    public SplitComponent(SplitsSettings settings, IEnumerable<ColumnData> columnsList, List<(int exLength, float exWidth, float width)> columnWidths)
     {
         NameLabel = new SimpleLabel()
         {
@@ -306,14 +306,15 @@ public class SplitComponent : IComponent
             {
                 while (ColumnWidths.Count < LabelsList.Count)
                 {
-                    ColumnWidths.Add(0f);
+                    ColumnWidths.Add((0, 0f, 0f));
                 }
 
                 float curX = width - 7;
                 float nameX = width - 7;
                 foreach (SimpleLabel label in LabelsList.Reverse())
                 {
-                    float labelWidth = ColumnWidths[LabelsList.IndexOf(label)];
+                    int i = LabelsList.IndexOf(label);
+                    float labelWidth = ColumnWidths[i].width;
 
                     label.Width = labelWidth + 20;
                     curX -= labelWidth + 5;
@@ -327,6 +328,10 @@ public class SplitComponent : IComponent
                     if (!string.IsNullOrEmpty(label.Text))
                     {
                         nameX = curX + labelWidth + 5 - label.ActualWidth;
+                        if (ColumnWidths[i].exWidth < label.ActualWidth)
+                        {
+                            ColumnWidths[i] = (label.Text.Length, label.ActualWidth, labelWidth);
+                        }
                     }
                 }
 
@@ -1179,7 +1184,7 @@ public class SplitComponent : IComponent
     {
         if (ColumnWidths != null)
         {
-            return ColumnWidths.Sum() + (5 * ColumnWidths.Count());
+            return ColumnWidths.Sum(e => e.width) + (5 * ColumnWidths.Count());
         }
 
         return 0f;
@@ -1239,7 +1244,7 @@ public class SplitComponent : IComponent
                 Cache["Columns" + index + "Color"] = label.ForeColor.ToArgb();
                 if (index < ColumnWidths.Count)
                 {
-                    Cache["Columns" + index + "Width"] = ColumnWidths[index];
+                    Cache["Columns" + index + "Width"] = ColumnWidths[index].width;
                 }
             }
 

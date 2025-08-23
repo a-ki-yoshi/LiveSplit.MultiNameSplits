@@ -18,7 +18,7 @@ public class LabelsComponent : IComponent
 
     public IEnumerable<ColumnData> ColumnsList { get; set; }
     public IList<SimpleLabel> LabelsList { get; set; }
-    protected List<float> ColumnWidths { get; }
+    protected List<(int exLength, float exWidth, float width)> ColumnWidths { get; }
 
     public float PaddingTop => 0f;
     public float PaddingLeft => 0f;
@@ -34,7 +34,7 @@ public class LabelsComponent : IComponent
     public float MinimumHeight { get; set; }
 
     public IDictionary<string, Action> ContextMenuControls => null;
-    public LabelsComponent(SplitsSettings settings, IEnumerable<ColumnData> columns, List<float> columnWidths)
+    public LabelsComponent(SplitsSettings settings, IEnumerable<ColumnData> columns, List<(int exLength, float exWidth, float width)> columnWidths)
     {
         Settings = settings;
         MinimumHeight = 31;
@@ -68,13 +68,13 @@ public class LabelsComponent : IComponent
         {
             while (ColumnWidths.Count < LabelsList.Count)
             {
-                ColumnWidths.Add(0f);
+                ColumnWidths.Add((0, 0f, 0f));
             }
 
             float curX = width - 7;
             foreach (SimpleLabel label in LabelsList.Reverse())
             {
-                float labelWidth = ColumnWidths[LabelsList.IndexOf(label)];
+                float labelWidth = ColumnWidths[LabelsList.IndexOf(label)].width;
 
                 curX -= labelWidth + 5;
                 label.Width = labelWidth;
@@ -156,9 +156,14 @@ public class LabelsComponent : IComponent
 
         Cache.Restart();
         Cache["ColumnsCount"] = ColumnsList.Count();
-        foreach (SimpleLabel label in LabelsList)
+        for (int index = 0; index < LabelsList.Count; index++)
         {
-            Cache["Columns" + LabelsList.IndexOf(label) + "Text"] = label.Text;
+            SimpleLabel label = LabelsList[index];
+            Cache["Columns" + index + "Text"] = label.Text;
+            if (index < ColumnWidths.Count)
+            {
+                Cache["Columns" + index + "Width"] = ColumnWidths[index].width;
+            }
         }
 
         if (invalidator != null && (Cache.HasChanged || FrameCount > 1))
