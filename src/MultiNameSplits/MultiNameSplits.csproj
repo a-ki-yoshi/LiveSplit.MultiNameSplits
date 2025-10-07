@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="$(LSPath)\src\LiveSplit.Core\LiveSplit.Core.csproj" Private="false" ExcludeAssets="runtime" />
     <ProjectReference Include="$(LSPath)\src\UpdateManager\UpdateManager.csproj" Private="false" ExcludeAssets="runtime" />
+    <ProjectReference Include="$(LSPath)\lib\CustomFontDialog\CustomFontDialog\CustomFontDialog.csproj"  Private="false" ExcludeAssets="runtime" />
   </ItemGroup>
 
   <ItemGroup>

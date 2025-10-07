@@ -6,7 +6,7 @@
 
 - **Forked from**: LiveSplit.Subsplits
 - **Compatibility**: All Splits functionality is available
-  - Note: When asking AI about specifications in this area, be careful as you might get irrelevant responses
+  - Note: Since this wasn't the case in the past, when asking AI about specifications in this area, be careful as you might get irrelevant responses
 - **Starting commit**: ba1dc4b
   - https://github.com/LiveSplit/LiveSplit.Subsplits/commit/ba1dc4b90ae42fc1b038174d41ce79a0f5c1ae31
 - **App compatibility**: Integrated up to the latest version at fork time (1.8.33)
@@ -65,21 +65,74 @@
   - Warning message: Displayed on the right side of input field, hidden when focus is lost or edited with valid characters
 
 ##### Display Time (Seconds)
+- **Description**: Time to display before switching to next name (not total time for all split names to cycle)
 - **Default value**: 10
 - **Range**: 1 ~ 999999 seconds
 - **Unit**: Seconds
-- **Description**: Time to display before switching to next name (not total time for all split names to cycle)
 - **Operation**: Arrow buttons increment by 1 second
 
 ##### Transition Time (Seconds)
+- **Description**: Effect time during transitions (from fade-in start to fade-out end)
 - **Default value**: 1.0
 - **Range**: 0.1 ~ 999.0 seconds
 - **Unit**: Seconds
-- **Description**: Effect time during transitions (from fade-in start to fade-out end)
 - **Example**: If set to 2 seconds, fade-out and fade-in each take 1 second
 - **Operation**: Arrow buttons increment by 0.1 seconds
 - **Notes**: If value is greater than 1/2 of Display Time, fade-in and fade-out timing overlaps, causing strange display (not prohibited but warning message shown)
 - **Note**: "Fade Time" would be more appropriate name, but using current name due to possibility of adding transition types in the future
+
+##### Details
+- **Overview**: Function to configure display settings individually for each text part separated by delimiter characters
+- **Purpose**: Used when you want to display different parts of split names with different colors, fonts, and display times
+- **Notes**: 
+  - Automatically calculates the maximum number of separators on initial display or when settings change, and displays that many individual setting fields
+  - If the string set in Separator Text does not exist in any split name, it will not be displayed
+
+###### Show
+- **Description**: Toggle display on/off. When unchecked, the following "Display Time" and "Color and Font" settings become unavailable
+- **Default Value**: true (checked)
+- **Example**: If the second separator is unchecked, the second text part of each split name will be skipped in display
+- **Notes**: 
+  - Cannot hide all items. When only one item is checked, the checkbox becomes unclickable to prevent toggling
+  - When splits have different numbers of separators, some text may not be displayed depending on which checkboxes are unchecked (no error occurs)
+  - In this case, only the displayed separators will follow the Details settings
+
+##### Display Time
+- **Description**: Time to display until switching to the next name, same as "Display Time (Seconds)"
+- **Default Value**: Same value as "Display Time (Seconds)"
+- **Range**: 1 ~ 999999 seconds
+- **Unit**: seconds
+- **Operation**: Arrow buttons increment by 1 second
+- **Notes**: 
+  - Once set to a value different from the default, it will not sync with "Display Time (Seconds)" changes unless Reset is used
+
+##### Color and Font (Color)
+- **Description**: Can change the text color
+- **Default Value**: Color set in other locations (black when settings dialog is opened. RGBA 0, 0, 0, 255)
+- **Restrictions**: None
+- **Notes**: 
+  - When set, it overrides text color settings in "Subsplits" or "Split Names" sections
+  - Once set, settings from other locations will not be reflected unless Reset is used
+  - When splits have different numbers of separators, color changes abruptly without fade
+
+##### Color and Font (Font)
+- **Description**: Can change the text font
+- **Default Value**: Font set in "Layout" tab (Segoe UI 16pt when settings dialog is opened)
+- **Restrictions**: None
+- **Notes**: 
+  - If font name is too long, the name displayed on the button may be truncated
+  - Once set, settings from "Layout" tab will not be reflected unless Reset is used
+
+##### Move (Up・Down)
+- **Description**: Can change the order of item settings
+- **Operation**: One click changes by one line
+- **Restrictions**: Up/Down buttons are disabled for topmost/bottommost items respectively
+- **Effect**: Changing order does not change the display order of parts in split names
+
+##### Reset
+- **Description**: Initializes item settings and returns to default values
+- **Target**: All settings for Show, Display Time, and Color and Font
+- **Note**: Once Reset is used, settings changes from other locations will be reflected again
 
 #### When different splits have different numbers of separators
 
@@ -99,7 +152,8 @@
 
 ### [2] Automatic Initial Settings Import Feature
 
-**Overview**: When adding component, if "Multi Name Splits", "Subsplits", or "Splits" already exists, reflects those settings as initial settings
+**Overview**: 
+When adding component, if "Multi Name Splits", "Subsplits", or "Splits" already exists, reflects those settings as initial settings
 
 **Priority**:
 - If multiple types exist, adopts only one in the above priority order

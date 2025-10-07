@@ -113,13 +113,6 @@ public partial class SplitsSettings : UserControl
     public bool ShowColumnLabels { get; set; }
     public Color LabelsColor { get; set; }
 
-    public bool EnableSubsplits { get; set; }
-
-    public MultiNameDisplayController MultiNameDisplayController { get; set; }
-    public string MultiNameSeparator { get; set; }
-    public float MultiNameDisplayTime { get; set; }
-    public float MultiNameTransitionTime { get; set; }
-
     public Color BeforeNamesColor { get; set; }
     public Color CurrentNamesColor { get; set; }
     public Color AfterNamesColor { get; set; }
@@ -145,6 +138,23 @@ public partial class SplitsSettings : UserControl
     public Size StartingSize { get; set; }
     public Size StartingTableLayoutSize { get; set; }
     private readonly int startingColumnSettingHeight;
+
+    public bool EnableSubsplits { get; set; }
+
+    public MultiNameDisplayController MultiNameDisplayController { get; set; }
+    public string MultiNameSeparator { get; set; }
+    public float MultiNameDisplayTime { get; set; }
+    public float MultiNameTransitionTime { get; set; }
+
+    private readonly int multiNameDetailsRowHeight;
+    private readonly System.Windows.Forms.RowStyle multiSplitNamesRowStyle;
+    private readonly int defaultMultiNameDetailsRowCount;
+    private int oldMultiNameDetailsCount = 0;
+    private bool isLoaded = false;
+    private IList<MultiNameDetailsSettings> oldMultiNameDetailsList = [];
+    public IList<MultiNameDetailsSettings> MultiNameDetailsList { get; set; }
+    public bool AlreadyLoadedMultiNameDetails { get; set; }
+   
 
     public SplitsSettings(LiveSplitState state)
     {
@@ -188,9 +198,11 @@ public partial class SplitsSettings : UserControl
                                 #endif
                             }
                         }
+
                         break;
                     }
                 }
+
                 if (baseSettings != null)
                 {
                     break;
@@ -209,6 +221,7 @@ public partial class SplitsSettings : UserControl
                     {
                         return (T)Enum.Parse(valType, baseSettings[key].ToString());
                     }
+
                     return (T)Convert.ChangeType(baseSettings[key], valType);
                 }
             }
@@ -349,12 +362,12 @@ public partial class SplitsSettings : UserControl
         btnLabelColor.DataBindings.Add("BackColor", this, "LabelsColor", false, DataSourceUpdateMode.OnPropertyChanged);
 
         txtMultiNameSeparator.DataBindings.Add("Text", this, "MultiNameSeparator", false, DataSourceUpdateMode.OnPropertyChanged);
-        txtMultiNameDisplayTime.DataBindings.Add("Text", this, "MultiNameDisplayTime", false, DataSourceUpdateMode.OnPropertyChanged);
-        txtMultiNameTransitionTime.DataBindings.Add("Text", this, "MultiNameTransitionTime", false, DataSourceUpdateMode.OnPropertyChanged);
+        dmnMultiNameDisplayTime.DataBindings.Add("Value", this, "MultiNameDisplayTime", false, DataSourceUpdateMode.OnPropertyChanged);
+        dmnMultiNameTransitionTime.DataBindings.Add("Value", this, "MultiNameTransitionTime", false, DataSourceUpdateMode.OnPropertyChanged);
         txtMultiNameSeparator.TextChanged += txtMultiNameSeparator_TextChanged;
         txtMultiNameSeparator.Leave += txtMultiNameSeparator_Leave;
-        txtMultiNameTransitionTime.ValueChanged += txtMultiNameTransitionTime_ValueChanged;
-        txtMultiNameDisplayTime.ValueChanged += txtMultiNameDisplayTime_ValueChanged;
+        dmnMultiNameTransitionTime.ValueChanged += dmnMultiNameTransitionTime_ValueChanged;
+        dmnMultiNameDisplayTime.ValueChanged += dmnMultiNameDisplayTime_ValueChanged;
         
         chkEnableSubsplits.DataBindings.Add("Checked", this, "EnableSubsplits", false, DataSourceUpdateMode.OnPropertyChanged);
         chkEnableSubsplits.CheckedChanged += chkEnableSubsplits_CheckedChanged;
@@ -365,25 +378,22 @@ public partial class SplitsSettings : UserControl
 
         startingColumnSettingHeight = ColumnsList[0].Height + 5;
 
+        MultiNameDetailsList = [];
         MultiNameDisplayController = new MultiNameDisplayController(this);
-        if (state.Layout != null)
-        {
-            MultiNameDisplayController.Reset();
-        }
+        multiSplitNamesRowStyle = tableLayoutPanel1.RowStyles[tableLayoutPanel1.GetRow(grpMultiSplitNames)];
+        defaultMultiNameDetailsRowCount = tableLayoutPanelMultiNameDetails.RowCount;
+        multiNameDetailsRowHeight = tableLayoutPanelMultiNameDetails.Size.Height / defaultMultiNameDetailsRowCount;
 
         // Emphasize group names
-        foreach (Control panel1_child in tableLayoutPanel1.Controls)
+        foreach (Control groupBox in tableLayoutPanel1.Controls.OfType<GroupBox>().ToList())
         {
-            if (panel1_child is GroupBox groupBox)
-            {
-                groupBox.Font = new Font(groupBox.Font.FontFamily, groupBox.Font.Size, FontStyle.Bold);
-                groupBox.ForeColor = Color.FromArgb(0, 120, 70);
+            groupBox.Font = new Font(groupBox.Font.FontFamily, groupBox.Font.Size, FontStyle.Bold);
+            groupBox.ForeColor = Color.FromArgb(0, 120, 70);
 
-                foreach (Control group_child in groupBox.Controls)
-                {
-                    group_child.Font = new Font(group_child.Font.FontFamily, group_child.Font.Size, FontStyle.Regular);
-                    group_child.ForeColor = Color.Black;
-                }
+            foreach (Control group_child in groupBox.Controls)
+            {
+                group_child.Font = new Font(group_child.Font.FontFamily, group_child.Font.Size, FontStyle.Regular);
+                group_child.ForeColor = Color.Black;
             }
         }
     }
@@ -570,7 +580,12 @@ public partial class SplitsSettings : UserControl
 
     private void SplitsSettings_Load(object sender, EventArgs e)
     {
+        UpdateLayoutForMultiNameDetails(- oldMultiNameDetailsCount);
+
         ResetColumns();
+
+        UpdateLayoutForMultiNameDetails(MultiNameDetailsList.Count);
+        isLoaded = true;
 
         chkOverrideDeltaColor_CheckedChanged(null, null);
         chkOverrideTextColor_CheckedChanged(null, null);
@@ -713,8 +728,6 @@ public partial class SplitsSettings : UserControl
         MultiNameDisplayTime = SettingsHelper.ParseFloat(element["MultiNameDisplayTime"], 10.0f);
         MultiNameTransitionTime = SettingsHelper.ParseFloat(element["MultiNameTransitionTime"], 1.0f);
         EnableSubsplits = SettingsHelper.ParseBool(element["EnableSubsplits"], true);
-
-        MultiNameDisplayController.Reset();
         
         if (version >= new Version(1, 7))
         {
@@ -766,6 +779,9 @@ public partial class SplitsSettings : UserControl
 
             OverrideTextColor = !SettingsHelper.ParseBool(element["UseTextColor"], true);
         }
+
+        ResetMultiNameDetails(element["MultiNameDetails"]);
+        isLoaded = false;
     }
 
     public XmlNode GetSettings(XmlDocument document)
@@ -847,11 +863,6 @@ public partial class SplitsSettings : UserControl
         SettingsHelper.CreateSetting(document, parent, "ShowColumnLabels", ShowColumnLabels) ^
         SettingsHelper.CreateSetting(document, parent, "LabelsColor", LabelsColor);
 
-        hashCode ^= SettingsHelper.CreateSetting(document, parent, "MultiNameSeparator", MultiNameSeparator);
-        hashCode ^= SettingsHelper.CreateSetting(document, parent, "MultiNameDisplayTime", MultiNameDisplayTime);
-        hashCode ^= SettingsHelper.CreateSetting(document, parent, "MultiNameTransitionTime", MultiNameTransitionTime);
-        hashCode ^= SettingsHelper.CreateSetting(document, parent, "EnableSubsplits", EnableSubsplits);
-
         XmlElement columnsElement = null;
         if (document != null)
         {
@@ -871,6 +882,46 @@ public partial class SplitsSettings : UserControl
 
             hashCode ^= columnData.CreateElement(document, settings) * count;
             count++;
+        }
+
+        hashCode ^= SettingsHelper.CreateSetting(document, parent, "EnableSubsplits", EnableSubsplits);
+        hashCode ^= SettingsHelper.CreateSetting(document, parent, "MultiNameSeparator", MultiNameSeparator);
+        hashCode ^= SettingsHelper.CreateSetting(document, parent, "MultiNameDisplayTime", MultiNameDisplayTime);
+        hashCode ^= SettingsHelper.CreateSetting(document, parent, "MultiNameTransitionTime", MultiNameTransitionTime);
+
+        XmlElement multiNameDetailsElement = null;
+        if (document != null)
+        {
+            multiNameDetailsElement = document.CreateElement("MultiNameDetails");
+            parent.AppendChild(multiNameDetailsElement);
+        }
+
+        bool canIgnoreSettings = true;
+        int countMultiNameDetails = 1;
+        for (int i = MultiNameDetailsList.Count - 1; i >= 0; i--)
+        {
+            MultiNameDetailsSettings settings = MultiNameDetailsList[i];
+            if (canIgnoreSettings)
+            {
+                if(!settings.OverrideDisplayTime && !settings.OverrideTextColor && !settings.OverrideTextFont)
+                {
+                    continue;
+                }
+                else
+                {
+                    canIgnoreSettings = false;
+                }
+            }
+
+            XmlElement settingsElement = null;
+            if (document != null)
+            {
+                settingsElement = document.CreateElement("Settings");
+                multiNameDetailsElement.AppendChild(settingsElement);
+            }
+
+            hashCode ^= settings.CreateSettingsNode(document, settingsElement) * countMultiNameDetails;
+            countMultiNameDetails++;
         }
 
         return hashCode;
@@ -1125,6 +1176,23 @@ public partial class SplitsSettings : UserControl
         AutomaticAbbreviation = chkAutomaticAbbreviation.Checked;
     }
 
+    private void chkEnableSubsplits_CheckedChanged(object sender, EventArgs e)
+    {
+        bool enabled = chkEnableSubsplits.Checked;
+        EnableSubsplits = enabled;
+
+        foreach (Control childControl in GroupBox9.Controls)
+        {
+            if (childControl != tableLayoutPanelEnableSubsplits)
+            {
+                childControl.Enabled = enabled;
+            }
+        }
+
+        ResetMultiNameDetails();
+        UpdateLayoutForMultiNameDetails();
+    }
+
     private void txtMultiNameSeparator_TextChanged(object sender, EventArgs e)
     {
         string invalidChars = "{}-";
@@ -1145,7 +1213,7 @@ public partial class SplitsSettings : UserControl
 
         if (isInvalid)
         {
-            selectionStart = selectionStart - (txtMultiNameSeparator.Text.Length - fixedText.Length);
+            selectionStart -= txtMultiNameSeparator.Text.Length - fixedText.Length;
             txtMultiNameSeparator.Text = fixedText;
             lblMultiNameSeparatorMessage.Text = "Invalid characters: { } -";
             lblMultiNameSeparatorMessage.ForeColor = Color.Red;
@@ -1155,9 +1223,15 @@ public partial class SplitsSettings : UserControl
         {   
             MultiNameSeparator_Notice();
         }
+
         txtMultiNameSeparator.SelectionStart = selectionStart;
         MultiNameSeparator = fixedText;
-        MultiNameDisplayController.Reset();
+        
+        if (isLoaded)
+        {
+            ResetMultiNameDetails();
+            UpdateLayoutForMultiNameDetails();
+        }
     }
 
     private void txtMultiNameSeparator_Leave(object sender, EventArgs e)
@@ -1165,13 +1239,22 @@ public partial class SplitsSettings : UserControl
         MultiNameSeparator_Notice();
     }
 
-    private void txtMultiNameDisplayTime_ValueChanged(object sender, EventArgs e)
+    private void dmnMultiNameDisplayTime_ValueChanged(object sender, EventArgs e)
     {
-        MultiNameTransitionTime_Notice();
+        MultiNameTime_Notice();
+
+        MultiNameDisplayTime = (float)dmnMultiNameDisplayTime.Value;
+        foreach (MultiNameDetailsSettings control in tableLayoutPanelMultiNameDetails.Controls.OfType<MultiNameDetailsSettings>().ToList())
+        {
+            control.SetDefaultDisplayTime(dmnMultiNameDisplayTime.Value);
+        }
+
+        MultiNameDisplayController.ResetVisibleNames();
     }
-    private void txtMultiNameTransitionTime_ValueChanged(object sender, EventArgs e)
+    
+    private void dmnMultiNameTransitionTime_ValueChanged(object sender, EventArgs e)
     {
-        MultiNameTransitionTime_Notice();
+        MultiNameTime_Notice();
     }
 
     private void MultiNameSeparator_Notice()
@@ -1188,33 +1271,190 @@ public partial class SplitsSettings : UserControl
         }
     }
 
-    private void MultiNameTransitionTime_Notice()
+    public bool IsMultiNameSafeTime(decimal displayTime)
     {
-        if ((decimal)txtMultiNameTransitionTime.Value > (decimal)txtMultiNameDisplayTime.Value / 2)
+        return dmnMultiNameTransitionTime.Value <= displayTime / 2;
+    }
+
+    public void MultiNameTime_Notice()
+    {
+        bool requiredNotice = false;
+
+        if (IsMultiNameSafeTime(dmnMultiNameDisplayTime.Value))
         {
-            lblMultiNameTransitionTimeMessage.Text = "Notice: May cause unexpected behavior when greater than half of Display Time";
-            lblMultiNameTransitionTimeMessage.ForeColor = Color.FromArgb(190, 80, 0);
-            lblMultiNameTransitionTimeMessage.Visible = true;
+            dmnMultiNameDisplayTime.ForeColor = Color.Black;
         }
         else
         {
-            lblMultiNameTransitionTimeMessage.Visible = false;
+            dmnMultiNameDisplayTime.ForeColor = lblMultiNameTransitionTimeMessage.ForeColor;
+            requiredNotice = true;
         }
-    }
 
-    private void chkEnableSubsplits_CheckedChanged(object sender, EventArgs e)
-    {
-        bool enabled = chkEnableSubsplits.Checked;
-        EnableSubsplits = enabled;
-
-        foreach (Control childControl in GroupBox9.Controls)
+        foreach(MultiNameDetailsSettings settings in MultiNameDetailsList)
         {
-            if (childControl != tableLayoutPanelEnableSubsplits)
+            if (IsMultiNameSafeTime((decimal)settings.DisplayTime))
             {
-                childControl.Enabled = enabled;
+                settings.GetDmnDisplayTime().ForeColor = settings.OverrideDisplayTime ? Color.Black : Color.Gray;
+            }
+            else
+            {
+                settings.GetDmnDisplayTime().ForeColor = lblMultiNameTransitionTimeMessage.ForeColor;
+                requiredNotice = true;
             }
         }
 
-        MultiNameDisplayController.Reset();
+        lblMultiNameTransitionTimeMessage.Visible = requiredNotice;
+    }
+
+    public void SetMultiNameDetailsIsVisibleEnabled()
+    {
+        IList<MultiNameDetailsSettings> visibleList= MultiNameDetailsList.Where(settings => settings.IsVisible).ToArray();
+
+        if (visibleList.Count == 1)
+        {
+            visibleList[0].GetChkIsVisible().Enabled = false;
+        }
+        else if (visibleList.Count >= 2)
+        {
+            foreach (MultiNameDetailsSettings settings in visibleList)
+            {
+                settings.GetChkIsVisible().Enabled = true;
+            }
+        }
+    }
+
+    private void UpdateLayoutForMultiNameDetails(int? countChanged = null)
+    {
+        countChanged ??= MultiNameDetailsList.Count - oldMultiNameDetailsCount;
+
+        if (countChanged == 0)
+        {
+            return;
+        }
+
+        if (MultiNameDetailsList.Count > 1)
+        {
+            int height = multiNameDetailsRowHeight * ((int)countChanged + (tableLayoutPanelMultiNameDetails.Height == 0 ? defaultMultiNameDetailsRowCount + 1 : 0));
+
+            Size = new Size(Size.Width, Size.Height + height);
+            multiSplitNamesRowStyle.Height += height;
+            tableLayoutPanelMultiNameDetails.Size = new Size(tableLayoutPanelMultiNameDetails.Size.Width, tableLayoutPanelMultiNameDetails.Size.Height + height);
+        }
+        else
+        {
+            Size = new Size(Size.Width, Size.Height - tableLayoutPanelMultiNameDetails.Height);
+            multiSplitNamesRowStyle.Height -= tableLayoutPanelMultiNameDetails.Height;
+            tableLayoutPanelMultiNameDetails.Size = new Size(tableLayoutPanelMultiNameDetails.Size.Width, 0);
+        }
+
+        oldMultiNameDetailsCount = MultiNameDetailsList.Count;
+    }
+
+    private MultiNameDetailsSettings addMultiNameDetails(MultiNameDetailsSettings control = null,  XmlNode node = null)
+    {
+        if (control == null)
+        {
+            control = new MultiNameDetailsSettings(CurrentState, this, MultiNameDetailsList, node);
+
+            control.MovedUp += multiNameDetails_MovedUp;
+            control.MovedDown += multiNameDetails_MovedDown;
+        }
+
+        MultiNameDetailsList.Add(control);
+        tableLayoutPanelMultiNameDetails.RowCount++;
+        tableLayoutPanelMultiNameDetails.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, multiNameDetailsRowHeight));
+        tableLayoutPanelMultiNameDetails.Controls.Add(control, 0, tableLayoutPanelMultiNameDetails.RowCount - 1);
+        tableLayoutPanelMultiNameDetails.SetColumnSpan(control, tableLayoutPanelMultiNameDetails.ColumnCount);
+
+        return control;
+    }
+
+    public void ResetMultiNameDetails (XmlElement MultiNameDetailsElement = null)
+    {
+        MultiNameDisplayController.ResetNames();
+        
+        if (MultiNameDetailsList.Count > oldMultiNameDetailsList.Count)
+        {
+            oldMultiNameDetailsList = MultiNameDetailsList.ToList();
+        }
+
+        MultiNameDetailsList.Clear();
+
+        tableLayoutPanelMultiNameDetails.RowCount = defaultMultiNameDetailsRowCount;
+        while (tableLayoutPanelMultiNameDetails.RowStyles.Count > defaultMultiNameDetailsRowCount)
+        {
+            tableLayoutPanelMultiNameDetails.RowStyles.RemoveAt(1);
+        }
+
+        foreach (MultiNameDetailsSettings control in tableLayoutPanelMultiNameDetails.Controls.OfType<MultiNameDetailsSettings>().ToList())
+        {
+           tableLayoutPanelMultiNameDetails.Controls.Remove(control);
+        }
+
+        int countMultiNameDetails = Math.Max(MultiNameDetailsElement != null ? MultiNameDetailsElement.ChildNodes.Count : 0, MultiNameDisplayController.MaxSeparation);
+        AlreadyLoadedMultiNameDetails = false;
+
+        for(int index = 0; index < countMultiNameDetails; index++)
+        {
+            if (oldMultiNameDetailsList.Count > index)
+            {
+                addMultiNameDetails(oldMultiNameDetailsList[index]);
+            }
+            else if (MultiNameDetailsElement != null && MultiNameDetailsElement.ChildNodes.Count - 1 > 0)
+            {
+                addMultiNameDetails(null, MultiNameDetailsElement.ChildNodes[index]);
+            }
+            else
+            {
+                addMultiNameDetails();
+            }
+        }
+
+        AlreadyLoadedMultiNameDetails = true;
+        SetMultiNameDetailsIsVisibleEnabled();
+        MultiNameTime_Notice();
+
+        MultiNameDisplayController.ResetVisibleNames();
+
+        for (int i = 0; i < MultiNameDetailsList.Count; i++)
+        {
+            MultiNameDetailsList[i].SetNth(i + 1);
+        }
+    }
+
+    private void replaceMultiNameDetails(MultiNameDetailsSettings control1, MultiNameDetailsSettings control2, int upperListIndex, int upperRowIndex)
+    {
+        tableLayoutPanelMultiNameDetails.Focus();
+
+        tableLayoutPanelMultiNameDetails.Controls.Remove(control1);
+        tableLayoutPanelMultiNameDetails.Controls.Remove(control2);
+        tableLayoutPanelMultiNameDetails.Controls.Add(control1, 0, upperRowIndex);
+        tableLayoutPanelMultiNameDetails.Controls.Add(control2, 0, upperRowIndex + 1);
+
+        MultiNameDetailsList[upperListIndex] = control1;
+        MultiNameDetailsList[upperListIndex + 1] = control2;
+
+        control1.SetNth(upperListIndex + 1);
+        control2.SetNth(upperListIndex + 2);
+
+        MultiNameDisplayController.ResetVisibleNames();
+    }
+
+    private void multiNameDetails_MovedUp(object sender, EventArgs e)
+    {
+        MultiNameDetailsSettings control1 = (MultiNameDetailsSettings)sender;
+        int upperListIndex = MultiNameDetailsList.IndexOf(control1) - 1;
+        int upperRowIndex = tableLayoutPanelMultiNameDetails.GetRow(control1) - 1;
+        MultiNameDetailsSettings control2 = MultiNameDetailsList[upperListIndex];
+        replaceMultiNameDetails(control1, control2, upperListIndex, upperRowIndex);
+    }
+
+    private void multiNameDetails_MovedDown(object sender, EventArgs e)
+    {
+        MultiNameDetailsSettings control2 = (MultiNameDetailsSettings)sender;
+        int upperListIndex = MultiNameDetailsList.IndexOf(control2);
+        int upperRowIndex = tableLayoutPanelMultiNameDetails.GetRow(control2);
+        MultiNameDetailsSettings control1 = MultiNameDetailsList[upperListIndex + 1];
+        replaceMultiNameDetails(control1, control2, upperListIndex, upperRowIndex);
     }
 }

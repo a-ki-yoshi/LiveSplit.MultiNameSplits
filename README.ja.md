@@ -31,7 +31,7 @@ LiveSplitのスプリット名を一定時間ごとに自動で切り替えて�
 ### 1. ダウンロード
 
 `MultiNameSplits.dll` ファイルをダウンロードしてください：
-- **最新版はこちら→** [**MultiNameSplits.dll**](https://github.com/a-ki-yoshi/LiveSplit.MultiNameSplits/releases/download/1.0.1/MultiNameSplits.dll)
+- **最新版はこちら→** [**MultiNameSplits.dll**](https://github.com/a-ki-yoshi/LiveSplit.MultiNameSplits/releases/download/2.0.0/MultiNameSplits.dll)
 - その他のバージョンは[GitHub Releases](https://github.com/a-ki-yoshi/LiveSplit.MultiNameSplits/releases) をご覧ください
 - dllとか聞きなれてなくて怖いかもしれませんが、襲ってこないので大丈夫です
 
@@ -133,6 +133,19 @@ LiveSplitのスプリット名を一定時間ごとに自動で切り替えて�
 - **範囲**: 0.1～999.0秒
 - **注意**: Display Timeの1/2以下に設定することを推奨
 
+#### Details
+
+- **概要**: 区切り文字で分割された各テキスト部分ごとに、表示有無・時間・色・フォントを個別設定できます。
+- **表示条件**: `Separator Text` がどのスプリット名にも含まれない場合、このセクションは表示されません。
+
+**各項目の説明**
+- **Show**: 該当部分の表示/非表示を切り替えます。全てを非表示にはできません（表示中が1つのみの場合は切替不可）。
+- **Display Time**: その部分を次に切り替えるまでの表示時間（秒）。デフォルトは全体の `Display Time` と同じ。個別に変更すると以後はResetボタンを押さない限り連動しません。
+- **Color and Font (Color)**: その部分の文字色。設定すると他の箇所の色設定より優先されます。※スプリットごとに区切り数が異なる場合は、色がフェードなしで切り替わることがあります。
+- **Color and Font (Font)**: その部分のフォント。設定すると `Layout` タブのフォント設定より優先されます。フォント名が長すぎる場合、ボタンに表示されるフォント情報が途中までしか表示されないことがあります。
+- **Move (Up/Down)**: 設定項目の表示順のみ変更します（スプリット名の表示順序は変わりません）。
+- **Reset**: その部分の Show/Display Time/Color/Font を初期化し、デフォルト値に戻します（リセット後は全体設定の反映が再び有効になります）。
+
 ### Subsplits
 
 タブを開いた時にスクロールしなくて済む位置にあります。青い文字が目印
@@ -210,6 +223,10 @@ LiveSplitのスプリット名を一定時間ごとに自動で切り替えて�
 - プルリクエストを作成
 
 ## 更新履歴
+
+### v2.0.0
+- Details機能を追加
+- Custom Variables機能の有無にかかわらず動作するように対応
 
 ### v1.0.1
 - [Issue #1](https://github.com/a-ki-yoshi/LiveSplit.MultiNameSplits/issues/1)対応

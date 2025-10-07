@@ -74,7 +74,7 @@ public class SplitsComponent : IComponent
     private void state_RunManuallyModified(object sender, EventArgs e)
     {
         sectionList.UpdateSplits(((LiveSplitState)sender).Run);
-        Settings.MultiNameDisplayController.Reset();
+        Settings.ResetMultiNameDetails();
     }
 
     private void state_ComparisonRenamed(object sender, EventArgs e)

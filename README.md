@@ -31,7 +31,7 @@ This component is based on the Subsplits component, with new features added. It 
 ### 1. Download
 
 Download the `MultiNameSplits.dll` file:
-- **Latest version →** [**MultiNameSplits.dll**](https://github.com/a-ki-yoshi/LiveSplit.MultiNameSplits/releases/download/1.0.1/MultiNameSplits.dll)
+- **Latest version →** [**MultiNameSplits.dll**](https://github.com/a-ki-yoshi/LiveSplit.MultiNameSplits/releases/download/2.0.0/MultiNameSplits.dll)
 - For other versions, see [GitHub Releases](https://github.com/a-ki-yoshi/LiveSplit.MultiNameSplits/releases)
 - If you're not familiar with DLL files, don't worry—they're safe!
 
@@ -133,6 +133,19 @@ You can find the "Multi Name Splits" tab in the middle, between "Split Names" an
 - **Range**: 0.1–999.0 seconds
 - **Note**: It is recommended to set this to half or less of the Display Time
 
+#### Details
+
+- **Overview**: Configure each text segment split by the separator individually: visibility, time, color, and font.
+- **Visibility condition**: If `Separator Text` is not present in any split name, this section will not appear.
+
+**Items**
+- **Show**: Toggle visibility of the segment. You cannot hide all segments (when only one is visible, it cannot be turned off).
+- **Display Time**: How long this segment stays visible before switching (in seconds). Default equals the global `Display Time`. Once changed here, it will not follow the global value again unless you press Reset.
+- **Color and Font (Color)**: Text color for this segment. Overrides color settings elsewhere. Note: If the number of segments differs between splits, colors may switch without a fade.
+- **Color and Font (Font)**: Font for this segment. Overrides the font configured in the `Layout` tab. If the font name is too long, the button may show it only partially.
+- **Move (Up/Down)**: Changes only the order of the settings entries (does not change the display order of split name segments).
+- **Reset**: Restores Show/Display Time/Color/Font of this segment to defaults (after Reset, global settings will apply again).
+
 ### Subsplits
 
 This tab is easy to find—look for the blue text.
@@ -210,6 +223,10 @@ I'd love your help!
 - Open a pull request
 
 ## Changelog
+
+### v2.0.0
+- Added Details functionality
+- Made compatible with or without Custom Variables functionality
 
 ### v1.0.1
 - Fixed [Issue #1](https://github.com/a-ki-yoshi/LiveSplit.MultiNameSplits/issues/1)

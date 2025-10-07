@@ -1,4 +1,6 @@
-﻿namespace LiveSplit.UI.Components
+﻿using System.Drawing;
+
+namespace LiveSplit.UI.Components
 {
     partial class SplitsSettings
     {
@@ -164,16 +166,24 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.chkAutomaticAbbreviation = new System.Windows.Forms.CheckBox();
-                        this.grpMultiSplitNames = new System.Windows.Forms.GroupBox();
+            this.grpMultiSplitNames = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanelMultiName = new System.Windows.Forms.TableLayoutPanel();
             this.lblMultiNameSeparator = new System.Windows.Forms.Label();
             this.txtMultiNameSeparator = new System.Windows.Forms.TextBox();
             this.lblMultiNameSeparatorMessage = new System.Windows.Forms.Label();
             this.lblMultiNameDisplayTime = new System.Windows.Forms.Label();
-            this.txtMultiNameDisplayTime = new System.Windows.Forms.NumericUpDown();
+            this.dmnMultiNameDisplayTime = new System.Windows.Forms.NumericUpDown();
             this.lblMultiNameTransitionTime = new System.Windows.Forms.Label();
-            this.txtMultiNameTransitionTime = new System.Windows.Forms.NumericUpDown();
+            this.dmnMultiNameTransitionTime = new System.Windows.Forms.NumericUpDown();
             this.lblMultiNameTransitionTimeMessage = new System.Windows.Forms.Label();
+            this.tableLayoutPanelMultiNameDetails = new System.Windows.Forms.TableLayoutPanel();
+            this.lblMultiNameDetails = new System.Windows.Forms.Label();
+            this.lblMultiNameDetailsMessage = new System.Windows.Forms.Label();
+            this.lblMultiNameDetailsIsVisible = new System.Windows.Forms.Label();
+            this.lblMultiNameDetailsDisplayTime = new System.Windows.Forms.Label();
+            this.lblMultiNameDetailsTextColorFont = new System.Windows.Forms.Label();
+            this.lblMultiNameDetailsMoveUpDown = new System.Windows.Forms.Label();
+
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dmnTotalSegments)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dmnUpcomingSegments)).BeginInit();
@@ -217,8 +227,9 @@
             this.tableLayoutPanel18.SuspendLayout();
             this.grpMultiSplitNames.SuspendLayout();
             this.tableLayoutPanelMultiName.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.txtMultiNameDisplayTime)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtMultiNameTransitionTime)).BeginInit();
+            this.tableLayoutPanelMultiNameDetails.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dmnMultiNameDisplayTime)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dmnMultiNameTransitionTime)).BeginInit();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -268,13 +279,13 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 707F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 195F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 110F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 179F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 81F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 187F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 215F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 54F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(445, 1782);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(445, 1851);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // cmbGradientType
@@ -2139,6 +2150,7 @@
             // 
             this.tableLayoutPanel1.SetColumnSpan(this.grpMultiSplitNames, 4);
             this.grpMultiSplitNames.Controls.Add(this.tableLayoutPanelMultiName);
+            this.grpMultiSplitNames.Controls.Add(this.tableLayoutPanelMultiNameDetails);
             this.grpMultiSplitNames.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grpMultiSplitNames.Location = new System.Drawing.Point(3, 1053);
             this.grpMultiSplitNames.Name = "grpMultiSplitNames";
@@ -2157,11 +2169,10 @@
             this.tableLayoutPanelMultiName.Controls.Add(this.txtMultiNameSeparator, 1, 0);
             this.tableLayoutPanelMultiName.Controls.Add(this.lblMultiNameSeparatorMessage, 2, 0);
             this.tableLayoutPanelMultiName.Controls.Add(this.lblMultiNameDisplayTime, 0, 1);
-            this.tableLayoutPanelMultiName.Controls.Add(this.txtMultiNameDisplayTime, 1, 1);
+            this.tableLayoutPanelMultiName.Controls.Add(this.dmnMultiNameDisplayTime, 1, 1);
             this.tableLayoutPanelMultiName.Controls.Add(this.lblMultiNameTransitionTime, 0, 2);
-            this.tableLayoutPanelMultiName.Controls.Add(this.txtMultiNameTransitionTime, 1, 2);
+            this.tableLayoutPanelMultiName.Controls.Add(this.dmnMultiNameTransitionTime, 1, 2);
             this.tableLayoutPanelMultiName.Controls.Add(this.lblMultiNameTransitionTimeMessage, 2, 2);
-            this.tableLayoutPanelMultiName.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanelMultiName.Location = new System.Drawing.Point(3, 15);
             this.tableLayoutPanelMultiName.Name = "tableLayoutPanelMultiName";
             this.tableLayoutPanelMultiName.RowCount = 3;
@@ -2209,29 +2220,24 @@
             this.lblMultiNameDisplayTime.TabIndex = 0;
             this.lblMultiNameDisplayTime.Text = "Display Time (seconds):";
             // 
-            // txtMultiNameDisplayTime
+            // dmnMultiNameDisplayTime
             // 
-            this.txtMultiNameDisplayTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtMultiNameDisplayTime.DecimalPlaces = 1;
-            this.txtMultiNameDisplayTime.Location = new System.Drawing.Point(119, 32);
-            this.txtMultiNameDisplayTime.Maximum = new decimal(new int[] {
+            this.dmnMultiNameDisplayTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.dmnMultiNameDisplayTime.DecimalPlaces = 1;
+            this.dmnMultiNameDisplayTime.Location = new System.Drawing.Point(119, 32);
+            this.dmnMultiNameDisplayTime.Maximum = new decimal(new int[] {
             999999,
             0,
             0,
             0});
-            this.txtMultiNameDisplayTime.Minimum = new decimal(new int[] {
+            this.dmnMultiNameDisplayTime.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             0});
-            this.txtMultiNameDisplayTime.Name = "txtMultiNameDisplayTime";
-            this.txtMultiNameDisplayTime.Size = new System.Drawing.Size(93, 19);
-            this.txtMultiNameDisplayTime.TabIndex = 1;
-            this.txtMultiNameDisplayTime.Value = new decimal(new int[] {
-            20,
-            0,
-            0,
-            0});
+            this.dmnMultiNameDisplayTime.Name = "dmnMultiNameDisplayTime";
+            this.dmnMultiNameDisplayTime.Size = new System.Drawing.Size(93, 19);
+            this.dmnMultiNameDisplayTime.TabIndex = 1;
             // 
             // lblMultiNameTransitionTime
             // 
@@ -2243,34 +2249,29 @@
             this.lblMultiNameTransitionTime.TabIndex = 2;
             this.lblMultiNameTransitionTime.Text = "Transition Time (seconds):";
             // 
-            // txtMultiNameTransitionTime
+            // dmnMultiNameTransitionTime
             // 
-            this.txtMultiNameTransitionTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtMultiNameTransitionTime.DecimalPlaces = 1;
-            this.txtMultiNameTransitionTime.Increment = new decimal(new int[] {
+            this.dmnMultiNameTransitionTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.dmnMultiNameTransitionTime.DecimalPlaces = 1;
+            this.dmnMultiNameTransitionTime.Increment = new decimal(new int[] {
             1,
             0,
             0,
             65536});
-            this.txtMultiNameTransitionTime.Location = new System.Drawing.Point(119, 61);
-            this.txtMultiNameTransitionTime.Maximum = new decimal(new int[] {
+            this.dmnMultiNameTransitionTime.Location = new System.Drawing.Point(119, 61);
+            this.dmnMultiNameTransitionTime.Maximum = new decimal(new int[] {
             999,
             0,
             0,
             0});
-            this.txtMultiNameTransitionTime.Minimum = new decimal(new int[] {
+            this.dmnMultiNameTransitionTime.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             65536});
-            this.txtMultiNameTransitionTime.Name = "txtMultiNameTransitionTime";
-            this.txtMultiNameTransitionTime.Size = new System.Drawing.Size(93, 19);
-            this.txtMultiNameTransitionTime.TabIndex = 3;
-            this.txtMultiNameTransitionTime.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
+            this.dmnMultiNameTransitionTime.Name = "dmnMultiNameTransitionTime";
+            this.dmnMultiNameTransitionTime.Size = new System.Drawing.Size(93, 19);
+            this.dmnMultiNameTransitionTime.TabIndex = 3;
             // 
             // lblMultiNameTransitionTimeMessage
             // 
@@ -2280,7 +2281,87 @@
             this.lblMultiNameTransitionTimeMessage.Name = "lblMultiNameTransitionTimeMessage";
             this.lblMultiNameTransitionTimeMessage.Size = new System.Drawing.Size(212, 12);
             this.lblMultiNameTransitionTimeMessage.TabIndex = 4;
+            this.lblMultiNameTransitionTimeMessage.Text = "Notice: May cause unexpected behavior when greater than half of Display Time";
+            this.lblMultiNameTransitionTimeMessage.ForeColor = Color.FromArgb(190, 80, 0);
             this.lblMultiNameTransitionTimeMessage.Visible = false;
+            // 
+            // tableLayoutPanelMultiNameDetails
+            // 
+            this.tableLayoutPanelMultiNameDetails.ColumnCount = 8;
+            this.tableLayoutPanelMultiNameDetails.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 30F)); //Nth
+            this.tableLayoutPanelMultiNameDetails.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 40F)); //IsVisible
+            this.tableLayoutPanelMultiNameDetails.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 80F)); //DisplayTime
+            this.tableLayoutPanelMultiNameDetails.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F)); //TextColor
+            this.tableLayoutPanelMultiNameDetails.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 164F)); //Font
+            this.tableLayoutPanelMultiNameDetails.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 23F)); //MoveUp
+            this.tableLayoutPanelMultiNameDetails.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 23F)); //MoveDown
+            this.tableLayoutPanelMultiNameDetails.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 45F)); //Clear
+            this.tableLayoutPanelMultiNameDetails.Location = new System.Drawing.Point(3, 104);
+            this.tableLayoutPanelMultiNameDetails.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
+            this.tableLayoutPanelMultiNameDetails.Name = "tableLayoutPanelMultiNameDetails";
+            this.tableLayoutPanelMultiNameDetails.RowCount = 2;
+            this.tableLayoutPanelMultiNameDetails.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanelMultiNameDetails.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanelMultiNameDetails.Size = new System.Drawing.Size(430, 60);
+            this.tableLayoutPanelMultiNameDetails.TabIndex = 1;
+            // 
+            // lblMultiNameDetails
+            // 
+            this.tableLayoutPanelMultiNameDetails.Controls.Add(this.lblMultiNameDetails, 0, 0);
+            this.tableLayoutPanelMultiNameDetails.SetColumnSpan(this.lblMultiNameDetails, 2);
+            this.lblMultiNameDetails.Text = "Details:";
+            this.lblMultiNameDetails.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblMultiNameDetails.AutoSize = true;
+            this.lblMultiNameDetails.Name = "lblMultiNameDetails";
+            // 
+            // lblMultiNameDetailsMessage
+            // 
+            this.tableLayoutPanelMultiNameDetails.Controls.Add(this.lblMultiNameDetailsMessage, 2, 0);
+            this.tableLayoutPanelMultiNameDetails.SetColumnSpan(this.lblMultiNameDetailsMessage, 4);
+            this.lblMultiNameDetailsMessage.Text = "You can set up per seperation.";
+            this.lblMultiNameDetailsMessage.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblMultiNameDetailsMessage.AutoSize = true;
+            this.lblMultiNameDetailsMessage.ForeColor = System.Drawing.SystemColors.HotTrack;
+            this.lblMultiNameDetailsMessage.Name = "lblMultiNameDetailsMessage";
+            // 
+            // lblMultiNameDetailsIsVisible
+            // 
+            this.tableLayoutPanelMultiNameDetails.Controls.Add(this.lblMultiNameDetailsIsVisible, 1, 1);
+            this.lblMultiNameDetailsIsVisible.Margin = new System.Windows.Forms.Padding(0, 6, 0, 3);
+            this.lblMultiNameDetailsIsVisible.Text = "Show";
+            this.lblMultiNameDetailsIsVisible.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblMultiNameDetailsIsVisible.AutoSize = true;
+            this.lblMultiNameDetailsIsVisible.Name = "lblMultiNameDetailsIsVisible";
+            // 
+            // lblMultiNameDetailsDisplayTime
+            // 
+            this.tableLayoutPanelMultiNameDetails.Controls.Add(this.lblMultiNameDetailsDisplayTime, 2, 1);
+            this.lblMultiNameDetailsDisplayTime.Margin = new System.Windows.Forms.Padding(0, 6, 0, 3);
+            this.lblMultiNameDetailsDisplayTime.Text = "Display Time";
+            this.lblMultiNameDetailsDisplayTime.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblMultiNameDetailsDisplayTime.AutoSize = true;
+            this.lblMultiNameDetailsDisplayTime.Name = "lblMultiNameDetailsDisplayTime";
+            // 
+            // lblMultiNameDetailsTextColorFont
+            // 
+            this.tableLayoutPanelMultiNameDetails.Controls.Add(this.lblMultiNameDetailsTextColorFont, 3, 1);
+            this.tableLayoutPanelMultiNameDetails.SetColumnSpan(this.lblMultiNameDetailsTextColorFont, 2);
+            this.lblMultiNameDetailsTextColorFont.Margin = new System.Windows.Forms.Padding(0, 6, 0, 3);
+            this.lblMultiNameDetailsTextColorFont.Text = "Color and Font";
+            this.lblMultiNameDetailsTextColorFont.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblMultiNameDetailsTextColorFont.AutoSize = true;
+            this.lblMultiNameDetailsTextColorFont.Name = "lblMultiNameDetailsTextColorFont";
+            // 
+            // lblMultiNameDetailsMoveUpDown
+            // 
+            this.tableLayoutPanelMultiNameDetails.Controls.Add(this.lblMultiNameDetailsMoveUpDown, 5, 1);
+            this.tableLayoutPanelMultiNameDetails.SetColumnSpan(this.lblMultiNameDetailsMoveUpDown, 2);
+            this.lblMultiNameDetailsMoveUpDown.Margin = new System.Windows.Forms.Padding(0, 6, 0, 3);
+            this.lblMultiNameDetailsMoveUpDown.Text = "Move";
+            this.lblMultiNameDetailsMoveUpDown.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblMultiNameDetailsMoveUpDown.AutoSize = true;
+            this.lblMultiNameDetailsMoveUpDown.Name = "lblMultiNameDetailsMoveUpDown";
+            
             // 
             // SplitsSettings
             // 
@@ -2289,7 +2370,7 @@
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "SplitsSettings";
             this.Padding = new System.Windows.Forms.Padding(7);
-            this.Size = new System.Drawing.Size(459, 1796);
+            this.Size = new System.Drawing.Size(459, 1865);
             this.Load += new System.EventHandler(this.SplitsSettings_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
@@ -2352,8 +2433,11 @@
             this.grpMultiSplitNames.ResumeLayout(false);
             this.tableLayoutPanelMultiName.ResumeLayout(false);
             this.tableLayoutPanelMultiName.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.txtMultiNameDisplayTime)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtMultiNameTransitionTime)).EndInit();
+            this.tableLayoutPanelMultiNameDetails.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dmnMultiNameDisplayTime)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dmnMultiNameTransitionTime)).EndInit();
+            this.tableLayoutPanelMultiNameDetails.ResumeLayout(false);
+            this.tableLayoutPanelMultiNameDetails.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -2501,11 +2585,18 @@
         private System.Windows.Forms.Label lblMultiNameSeparatorMessage;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanelMultiName;
         private System.Windows.Forms.Label lblMultiNameDisplayTime;
-        private System.Windows.Forms.NumericUpDown txtMultiNameDisplayTime;
+        private System.Windows.Forms.NumericUpDown dmnMultiNameDisplayTime;
         private System.Windows.Forms.Label lblMultiNameTransitionTime;
-        private System.Windows.Forms.NumericUpDown txtMultiNameTransitionTime;
+        private System.Windows.Forms.NumericUpDown dmnMultiNameTransitionTime;
         private System.Windows.Forms.Label lblMultiNameTransitionTimeMessage;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanelEnableSubsplits;
         private System.Windows.Forms.CheckBox chkEnableSubsplits;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanelMultiNameDetails;
+        private System.Windows.Forms.Label lblMultiNameDetails;
+        private System.Windows.Forms.Label lblMultiNameDetailsMessage;
+        private System.Windows.Forms.Label lblMultiNameDetailsIsVisible;
+        private System.Windows.Forms.Label lblMultiNameDetailsDisplayTime;
+        private System.Windows.Forms.Label lblMultiNameDetailsTextColorFont;
+        private System.Windows.Forms.Label lblMultiNameDetailsMoveUpDown;
     }
 }

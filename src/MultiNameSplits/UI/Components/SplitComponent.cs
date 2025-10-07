@@ -309,7 +309,7 @@ public class SplitComponent : IComponent
                     drawHeight);
             }
 
-            NameLabel.Font = state.LayoutSettings.TextFont;
+            //NameLabel.Font = state.LayoutSettings.TextFont;
             NameLabel.HasShadow = state.LayoutSettings.DropShadows;
 
             if (ColumnsList.Count() == LabelsList.Count)
@@ -495,7 +495,7 @@ public class SplitComponent : IComponent
                 drawHeight);
         }
 
-        NameLabel.Font = state.LayoutSettings.TextFont;
+        //NameLabel.Font = state.LayoutSettings.TextFont;
 
         NameLabel.X = 5 + IconWidth;
         NameLabel.HasShadow = state.LayoutSettings.DropShadows;
