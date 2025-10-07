@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows.Forms;
 
 using LiveSplit.Model;
+using LiveSplit.TimeFormatters;
 
 namespace LiveSplit.UI.Components;
 
@@ -22,6 +23,13 @@ public class SplitsComponent : IComponent
     protected IList<SplitComponent> SplitComponents { get; set; }
 
     protected SplitsSettings Settings { get; set; }
+
+    protected SimpleLabel MeasureTimeLabel { get; set; }
+    protected SimpleLabel MeasureDeltaLabel { get; set; }
+    protected SimpleLabel MeasureCharLabel { get; set; }
+
+    protected ITimeFormatter TimeFormatter { get; set; }
+    protected ITimeFormatter DeltaTimeFormatter { get; set; }
 
     private Dictionary<Image, Image> ShadowImages { get; set; }
 
@@ -42,6 +50,7 @@ public class SplitsComponent : IComponent
     protected Color OldShadowsColor { get; set; }
 
     protected IEnumerable<ColumnData> ColumnsList => Settings.ColumnsList.Select(x => x.Data);
+    protected List<float> ColumnWidths { get; set; }
 
     public string ComponentName
       => "Multi Name Splits";

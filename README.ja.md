@@ -23,15 +23,17 @@ LiveSplitのスプリット名を一定時間ごとに自動で切り替えて�
 
 ![コンポーネント動作のGIF動画](docs/images/component_demo.gif)
 
+[参考動画 (YouTube)](https://youtu.be/SaANew-s__4)
+
 ## 対応バージョン
-- LiveSplit 1.8.30 ~ 1.8.33（最新版）
+- LiveSplit 1.8.30 ~ 1.8.35（最新版）
 
 ## つかいかた
 
 ### 1. ダウンロード
 
 `MultiNameSplits.dll` ファイルをダウンロードしてください：
-- **最新版はこちら→** [**MultiNameSplits.dll**](https://github.com/a-ki-yoshi/LiveSplit.MultiNameSplits/releases/download/2.0.0/MultiNameSplits.dll)
+- **最新版はこちら→** [**MultiNameSplits.dll**](https://github.com/a-ki-yoshi/LiveSplit.MultiNameSplits/releases/download/1.1.0/MultiNameSplits.dll)
 - その他のバージョンは[GitHub Releases](https://github.com/a-ki-yoshi/LiveSplit.MultiNameSplits/releases) をご覧ください
 - dllとか聞きなれてなくて怖いかもしれませんが、襲ってこないので大丈夫です
 
@@ -224,7 +226,7 @@ LiveSplitのスプリット名を一定時間ごとに自動で切り替えて�
 
 ## 更新履歴
 
-### v2.0.0
+### v1.1.0
 - Details機能を追加
 - Custom Variables機能の有無にかかわらず動作するように対応
 

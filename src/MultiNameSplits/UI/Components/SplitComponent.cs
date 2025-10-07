@@ -884,7 +884,7 @@ public class SplitComponent : IComponent
                 {
                     label.Text = TimeFormatter.Format(Split.SplitTime[timingMethod]);
                 }
-                else //SegmentTime
+                else if (type == ColumnType.SegmentTime)
                 {
                     TimeSpan? segmentTime = LiveSplitStateHelper.GetPreviousSegmentTime(state, splitIndex, timingMethod);
                     label.Text = TimeFormatter.Format(segmentTime);
@@ -1056,7 +1056,7 @@ public class SplitComponent : IComponent
                 {
                     label.Text = TimeFormatter.Format(Split.SplitTime[timingMethod]);
                 }
-                else //SegmentTime
+                else if (type == ColumnType.SegmentTime)
                 {
                     TimeSpan? segmentTime = getSectionTime(state, splitIndex, TopSplit, comparison, timingMethod);
                     label.Text = TimeFormatter.Format(segmentTime);
