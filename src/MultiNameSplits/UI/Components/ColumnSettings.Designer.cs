@@ -131,7 +131,6 @@
             this.tableLayoutPanel1.SetColumnSpan(this.cmbColumnType, 3);
             this.cmbColumnType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbColumnType.FormattingEnabled = true;
-
             this.cmbColumnType.Location = new System.Drawing.Point(93, 33);
             this.cmbColumnType.Name = "cmbColumnType";
             this.cmbColumnType.Size = new System.Drawing.Size(325, 21);
