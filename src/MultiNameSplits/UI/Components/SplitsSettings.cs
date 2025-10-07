@@ -400,7 +400,7 @@ public partial class SplitsSettings : UserControl
 
     private void chkColumnLabels_CheckedChanged(object sender, EventArgs e)
     {
-        btnLabelColor.Enabled = chkColumnLabels.Checked;
+        btnLabelColor.Enabled = lblLabelsColor.Enabled = chkColumnLabels.Checked;
     }
 
     private void chkDisplayIcons_CheckedChanged(object sender, EventArgs e)

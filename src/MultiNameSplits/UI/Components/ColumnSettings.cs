@@ -42,6 +42,22 @@ public partial class ColumnSettings : UserControl
 
         CurrentState = state;
         ColumnsList = columnsList;
+
+        var columnTypeItems = new object[] {
+            "Delta",
+            "Split Time",
+            "Delta or Split Time",
+            "Segment Delta",
+            "Segment Time",
+            "Segment Delta or Segment Time"
+        };
+
+        cmbColumnType.Items.AddRange(columnTypeItems);
+        
+        if (typeof(ISegment).GetProperty("CustomVariableValues") != null)
+        {
+            cmbColumnType.Items.Add("Custom Variable");
+        }
     }
 
     private void cmbTimingMethod_SelectedIndexChanged(object sender, EventArgs e)

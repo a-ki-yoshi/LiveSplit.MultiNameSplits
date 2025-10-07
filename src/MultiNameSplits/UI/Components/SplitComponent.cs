@@ -20,6 +20,18 @@ public class SplitComponent : IComponent
     public bool CollapsedSplit { get; set; }
     public bool oddSplit { get; set; }
 
+    private System.Reflection.PropertyInfo _customVariablePropertyCache = null;
+
+    private IDictionary<string, string> GetCustomVariableDict(ISegment split)
+    {
+        if (_customVariablePropertyCache == null)
+        {
+            _customVariablePropertyCache = split.GetType().GetProperty("CustomVariableValues");
+        }
+
+        return _customVariablePropertyCache.GetValue(split) as IDictionary<string, string>;
+    }
+
     private bool Indent => Settings.EnableSubsplits && Settings.IndentSubsplits && (IsSubsplit || ForceIndent);
 
     public ISegment Split { get; set; }
@@ -877,6 +889,11 @@ public class SplitComponent : IComponent
                     TimeSpan? segmentTime = LiveSplitStateHelper.GetPreviousSegmentTime(state, splitIndex, timingMethod);
                     label.Text = TimeFormatter.Format(segmentTime);
                 }
+                else if (type == ColumnType.CustomVariable)
+                {
+                    GetCustomVariableDict(Split).TryGetValue(data.Name, out string text);
+                    label.Text = text ?? "";
+                }
             }
 
             if (type is ColumnType.DeltaorSplitTime or ColumnType.Delta)
@@ -1043,6 +1060,11 @@ public class SplitComponent : IComponent
                 {
                     TimeSpan? segmentTime = getSectionTime(state, splitIndex, TopSplit, comparison, timingMethod);
                     label.Text = TimeFormatter.Format(segmentTime);
+                }
+                else if (type == ColumnType.CustomVariable)
+                {
+                    GetCustomVariableDict(Split).TryGetValue(data.Name, out string text);
+                    label.Text = text ?? "";
                 }
             }
 

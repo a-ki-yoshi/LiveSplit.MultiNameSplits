@@ -56,6 +56,8 @@ public class SplitsComponent : IComponent
 
     public IDictionary<string, Action> ContextMenuControls => null;
 
+    private Dictionary<Type, System.Reflection.PropertyInfo> _customVariablePropDictCache = new();
+
     public SplitsComponent(LiveSplitState state)
     {
         CurrentState = state;
@@ -664,6 +666,59 @@ public class SplitsComponent : IComponent
         if (invalidator != null)
         {
             InternalComponent.Update(invalidator, state, width, height, mode);
+        }
+    }
+
+    private void CalculateColumnWidths(IRun run)
+    {
+        if (ColumnsList != null)
+        {
+            while (ColumnWidths.Count < ColumnsList.Count())
+            {
+                ColumnWidths.Add(0f);
+            }
+
+            for (int i = 0; i < ColumnsList.Count(); i++)
+            {
+                ColumnData column = ColumnsList.ElementAt(i);
+
+                float labelWidth = 0f;
+                if (column.Type is ColumnType.DeltaorSplitTime or ColumnType.SegmentDeltaorSegmentTime)
+                {
+                    labelWidth = Math.Max(MeasureDeltaLabel.ActualWidth, MeasureTimeLabel.ActualWidth);
+                }
+                else if (column.Type is ColumnType.Delta or ColumnType.SegmentDelta)
+                {
+                    labelWidth = MeasureDeltaLabel.ActualWidth;
+                }
+                else if (column.Type is ColumnType.SplitTime or ColumnType.SegmentTime)
+                {
+                    labelWidth = MeasureTimeLabel.ActualWidth;
+                }
+                else if (column.Type is ColumnType.CustomVariable)
+                {
+                    int longest_length = run.Metadata.CustomVariableValue(column.Name).Length;
+
+                    foreach (ISegment split in run)
+                    {
+                        if (!_customVariablePropDictCache.TryGetValue(split.GetType(), out System.Reflection.PropertyInfo property))
+                        {
+                            property = split.GetType().GetProperty("CustomVariableValues");
+                            _customVariablePropDictCache[split.GetType()] = property;
+                        }
+
+                        var dict = property.GetValue(split) as IDictionary<string, string>;
+                        if (dict.TryGetValue(column.Name, out string value) && !string.IsNullOrEmpty(value))
+                        {
+                            longest_length = Math.Max(longest_length, value.Length);
+                        }
+                    }
+
+                    labelWidth = MeasureCharLabel.ActualWidth * longest_length;
+                }
+
+                ColumnWidths[i] = labelWidth;
+            }
         }
     }
 
