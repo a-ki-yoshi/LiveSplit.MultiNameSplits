@@ -25,6 +25,4 @@ publish/
 .LSOverride
 
 # dev
-docs/images/original/
-docs/scripts/
-.cursor/
+.cursor
