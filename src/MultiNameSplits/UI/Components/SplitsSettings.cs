@@ -1161,7 +1161,7 @@ public partial class SplitsSettings : UserControl
     {
         UpdateLayoutForColumn();
 
-        var columnControl = new ColumnSettings(CurrentState, "#" + (ColumnsList.Count + 1), ColumnsList);
+        var columnControl = new ColumnSettings(CurrentState, "", ColumnsList);
         ColumnsList.Add(columnControl);
         AddColumnToLayout(columnControl, ColumnsList.Count);
 
