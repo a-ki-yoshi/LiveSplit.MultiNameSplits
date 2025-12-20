@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <RootNamespace>LiveSplit</RootNamespace>
@@ -6,7 +6,7 @@
     <TargetFramework>net4.8.1</TargetFramework>
     <LangVersion>latest</LangVersion>
     <LSPath>..\..\..\LiveSplit</LSPath>
-    <ProductPath>..\..\..\..\apps\LiveSplit</ProductPath>
+    <ProductPath>..\..\..\apps\LiveSplit</ProductPath>
     <Platforms>AnyCPU</Platforms>
     <EnableDynamicLoading>false</EnableDynamicLoading>
   </PropertyGroup>

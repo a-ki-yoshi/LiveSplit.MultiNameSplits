@@ -1,5 +1,13 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <updates>
+  <update version="1.1.1">
+    <files>
+      <file path="1.1.1/MultiNameSplits.dll" localPath="Components/MultiNameSplits.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Merged Subsplits component update (fixed initial column names)</change>
+    </changelog>
+  </update>
   <update version="1.1.0">
     <files>
       <file path="1.1.0/MultiNameSplits.dll" localPath="Components/MultiNameSplits.dll" status="changed" />
