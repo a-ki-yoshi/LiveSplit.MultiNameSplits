@@ -126,7 +126,7 @@ You can find the "Multi Name Splits" tab in the middle, between "Split Names" an
 
 #### Display Time
 - **Description**: How long each name is displayed
-- **Default**: 10 seconds
+- **Default**: 2 seconds
 - **Range**: 1–999999 seconds
 
 #### Transition Time
@@ -225,6 +225,9 @@ I'd love your help!
 - Open a pull request
 
 ## Changelog
+
+### v1.1.2
+- Changed default Display Time from 10 seconds to 2 seconds
 
 ### v1.1.1
 - Merged update from Subsplits component (Fixed initial column names)

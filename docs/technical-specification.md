@@ -66,7 +66,7 @@
 
 ##### Display Time (Seconds)
 - **Description**: Time to display before switching to next name (not total time for all split names to cycle)
-- **Default value**: 10
+- **Default value**: 2
 - **Range**: 1 ~ 999999 seconds
 - **Unit**: Seconds
 - **Operation**: Arrow buttons increment by 1 second

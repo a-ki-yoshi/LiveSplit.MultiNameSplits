@@ -299,7 +299,7 @@ public partial class SplitsSettings : UserControl
         SectionTimerGradient = getInitVal("SectionTimerGradient", true);
         SectionTimerAccuracy = getInitVal("SectionTimerAccuracy", TimeAccuracy.Tenths);
         MultiNameSeparator = getInitVal("MultiNameSeparator", "/");
-        MultiNameDisplayTime = getInitVal("MultiNameDisplayTime", 10.0f);
+        MultiNameDisplayTime = getInitVal("MultiNameDisplayTime", 2.0f);
         MultiNameTransitionTime = getInitVal("MultiNameTransitionTime", 1.0f);
         EnableSubsplits = getInitVal("EnableSubsplits", foundComponentName == "Splits" ? false : true);
 
@@ -725,7 +725,7 @@ public partial class SplitsSettings : UserControl
         LabelsColor = SettingsHelper.ParseColor(element["LabelsColor"], Color.FromArgb(255, 255, 255));
 
         MultiNameSeparator = SettingsHelper.ParseString(element["MultiNameSeparator"], "/");
-        MultiNameDisplayTime = SettingsHelper.ParseFloat(element["MultiNameDisplayTime"], 10.0f);
+        MultiNameDisplayTime = SettingsHelper.ParseFloat(element["MultiNameDisplayTime"], 2.0f);
         MultiNameTransitionTime = SettingsHelper.ParseFloat(element["MultiNameTransitionTime"], 1.0f);
         EnableSubsplits = SettingsHelper.ParseBool(element["EnableSubsplits"], true);
         
