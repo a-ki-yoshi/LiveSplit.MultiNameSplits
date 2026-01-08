@@ -108,9 +108,9 @@ public class MultiNameDisplayController
                     calcMax(GetSeparatedNames(match.Groups[2].Value).Length);
                     continue;
                 }
-                else if (split.Name.StartsWith("- "))
+                else if (split.Name.StartsWith("-"))
                 {
-                    calcMax(GetSeparatedNames(split.Name[2..]).Length);
+                    calcMax(GetSeparatedNames(split.Name[1..]).Length);
                     continue;
                 }
             }

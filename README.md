@@ -228,6 +228,7 @@ I'd love your help!
 
 ### v1.1.2
 - Changed default Display Time from 10 seconds to 2 seconds
+- Fixed bug when using Subsplits settings
 
 ### v1.1.1
 - Merged update from Subsplits component (Fixed initial column names)
